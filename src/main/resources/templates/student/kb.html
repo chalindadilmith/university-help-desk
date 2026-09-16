@@ -3,7 +3,7 @@
 <body>
 <div th:replace="~{fragments/layout :: layout('Knowledge Base', 'kb', ~{::section})}">
 <section>
-    <h1><i class="fa-solid fa-book-open"></i> Knowledge Base</h1>
+    <h1>Knowledge Base</h1>
 
     <div class="card">
         <form th:action="@{/student/kb}" method="get" class="form-row" style="align-items:flex-end;">
@@ -11,26 +11,26 @@
                 <label for="keyword">Search FAQs / Articles</label>
                 <input type="text" id="keyword" name="keyword" th:value="${keyword}" placeholder="e.g. password reset"/>
             </div>
-            <div><button type="submit" class="btn"><i class="fa-solid fa-magnifying-glass"></i> Search</button></div>
+            <div><button type="submit" class="btn">Search</button></div>
         </form>
     </div>
 
-    <div class="empty-state" th:if="${#lists.isEmpty(articles)}"><i class="fa-regular fa-circle-question"></i>No articles match your search yet - try the chatbot below, or create a ticket.</div>
+    <div class="empty-state" th:if="${#lists.isEmpty(articles)}">No articles match your search yet - try the chatbot below, or create a ticket.</div>
     <div class="card-grid" th:unless="${#lists.isEmpty(articles)}">
         <div class="card" th:each="a : ${articles}">
-            <h3><i class="fa-regular fa-file-lines"></i> <a th:href="@{/student/kb/{id}(id=${a.id})}" th:text="${a.title}"></a></h3>
+            <h3><a th:href="@{/student/kb/{id}(id=${a.id})}" th:text="${a.title}"></a></h3>
             <p class="muted" th:text="${a.category.name}"></p>
         </div>
     </div>
 
-    <div class="section-title"><h2><i class="fa-solid fa-robot"></i> Ask the Chatbot</h2></div>
+    <div class="section-title"><h2>Ask the Chatbot</h2></div>
     <div class="chatbot-box">
         <div class="chatbot-messages" id="chatbotMessages">
             <div class="chatbot-msg bot">Hi! Ask me about anything you'd normally raise a help desk ticket for - I'll search the knowledge base first.</div>
         </div>
         <div class="chatbot-input-row">
             <input type="text" id="chatbotInput" placeholder="Type your question and press Enter..."/>
-            <button type="button" class="btn" onclick="sendChatbotMessage()"><i class="fa-solid fa-paper-plane"></i> Send</button>
+            <button type="button" class="btn" onclick="sendChatbotMessage()">Send</button>
         </div>
     </div>
 </section>

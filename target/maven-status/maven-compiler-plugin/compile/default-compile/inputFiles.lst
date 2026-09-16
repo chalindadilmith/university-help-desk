@@ -1,110 +1,110 @@
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\config\DemoDataSeeder.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\config\SecurityConfig.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\controller\AdminAuditLogController.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\controller\AdminConfigController.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\controller\AdminDashboardController.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\controller\AdminLostFoundController.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\controller\AdminRegistrationConfigController.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\controller\AdminUserController.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\controller\AuthController.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\controller\GlobalModelAttributesAdvice.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\controller\HomeController.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\controller\KnowledgeBaseController.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\controller\LostFoundController.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\controller\ProfileController.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\controller\RegistrationController.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\controller\ReportController.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\controller\StaffDashboardController.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\controller\StaffKbController.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\controller\StaffTicketController.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\controller\StudentDashboardController.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\controller\TicketController.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\dto\ArticleForm.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\dto\CategoryForm.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\dto\ChatbotReply.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\dto\CourseForm.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\dto\OfferingForm.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\dto\PoolForm.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\dto\RegisterForm.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\dto\ReportItemForm.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\dto\ReportSummary.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\dto\RoutingRuleForm.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\dto\SemesterForm.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\dto\StaffCreateForm.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\dto\StaffCreationResult.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\dto\TicketForm.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\entity\AccountStatus.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\entity\AuditLog.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\entity\ClaimStatus.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\entity\Course.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\entity\CourseOffering.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\entity\Feedback.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\entity\ItemStatus.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\entity\ItemType.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\entity\JobPool.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\entity\KbArticle.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\entity\KbArticleStatus.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\entity\KbCategory.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\entity\LostFoundClaim.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\entity\LostFoundItem.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\entity\Notification.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\entity\Priority.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\entity\Registration.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\entity\RegistrationStatus.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\entity\Role.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\entity\RoutingRule.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\entity\Semester.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\entity\Ticket.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\entity\TicketAttachment.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\entity\TicketCategory.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\entity\TicketComment.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\entity\TicketStatus.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\entity\User.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\exception\BusinessRuleException.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\exception\DuplicateResourceException.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\exception\GlobalExceptionHandler.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\exception\ResourceNotFoundException.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\HelpDeskApplication.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\repository\AuditLogRepository.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\repository\CourseOfferingRepository.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\repository\CourseRepository.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\repository\FeedbackRepository.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\repository\JobPoolRepository.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\repository\KbArticleRepository.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\repository\KbCategoryRepository.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\repository\LostFoundClaimRepository.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\repository\LostFoundItemRepository.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\repository\NotificationRepository.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\repository\RegistrationRepository.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\repository\RoutingRuleRepository.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\repository\SemesterRepository.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\repository\TicketAttachmentRepository.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\repository\TicketCategoryRepository.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\repository\TicketCommentRepository.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\repository\TicketRepository.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\repository\UserRepository.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\security\CustomUserDetails.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\security\CustomUserDetailsService.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\security\RoleBasedAuthenticationSuccessHandler.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\service\AdminConfigService.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\service\AuditLogService.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\service\ChatbotService.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\service\FeedbackService.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\service\impl\AdminConfigServiceImpl.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\service\impl\ChatbotServiceImpl.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\service\impl\FeedbackServiceImpl.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\service\impl\KnowledgeBaseServiceImpl.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\service\impl\LostFoundServiceImpl.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\service\impl\NotificationServiceImpl.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\service\impl\RegistrationServiceImpl.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\service\impl\ReportingServiceImpl.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\service\impl\TicketServiceImpl.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\service\impl\UserServiceImpl.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\service\KnowledgeBaseService.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\service\LostFoundService.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\service\NotificationService.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\service\RegistrationService.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\service\ReportingService.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\service\TicketService.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\service\UserService.java
-C:\Users\LOQ\Desktop\Uni Help desk\university-help-desk\src\main\java\com\helpdesk\util\RoleRedirectResolver.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\config\DemoDataSeeder.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\config\SecurityConfig.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\controller\AdminAuditLogController.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\controller\AdminConfigController.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\controller\AdminDashboardController.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\controller\AdminLostFoundController.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\controller\AdminRegistrationConfigController.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\controller\AdminUserController.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\controller\AuthController.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\controller\GlobalModelAttributesAdvice.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\controller\HomeController.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\controller\KnowledgeBaseController.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\controller\LostFoundController.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\controller\ProfileController.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\controller\RegistrationController.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\controller\ReportController.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\controller\StaffDashboardController.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\controller\StaffKbController.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\controller\StaffTicketController.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\controller\StudentDashboardController.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\controller\TicketController.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\dto\ArticleForm.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\dto\CategoryForm.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\dto\ChatbotReply.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\dto\CourseForm.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\dto\OfferingForm.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\dto\PoolForm.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\dto\RegisterForm.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\dto\ReportItemForm.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\dto\ReportSummary.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\dto\RoutingRuleForm.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\dto\SemesterForm.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\dto\StaffCreateForm.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\dto\StaffCreationResult.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\dto\TicketForm.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\entity\AccountStatus.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\entity\AuditLog.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\entity\ClaimStatus.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\entity\Course.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\entity\CourseOffering.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\entity\Feedback.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\entity\ItemStatus.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\entity\ItemType.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\entity\JobPool.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\entity\KbArticle.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\entity\KbArticleStatus.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\entity\KbCategory.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\entity\LostFoundClaim.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\entity\LostFoundItem.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\entity\Notification.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\entity\Priority.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\entity\Registration.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\entity\RegistrationStatus.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\entity\Role.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\entity\RoutingRule.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\entity\Semester.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\entity\Ticket.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\entity\TicketAttachment.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\entity\TicketCategory.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\entity\TicketComment.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\entity\TicketStatus.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\entity\User.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\exception\BusinessRuleException.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\exception\DuplicateResourceException.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\exception\GlobalExceptionHandler.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\exception\ResourceNotFoundException.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\HelpDeskApplication.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\repository\AuditLogRepository.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\repository\CourseOfferingRepository.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\repository\CourseRepository.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\repository\FeedbackRepository.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\repository\JobPoolRepository.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\repository\KbArticleRepository.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\repository\KbCategoryRepository.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\repository\LostFoundClaimRepository.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\repository\LostFoundItemRepository.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\repository\NotificationRepository.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\repository\RegistrationRepository.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\repository\RoutingRuleRepository.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\repository\SemesterRepository.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\repository\TicketAttachmentRepository.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\repository\TicketCategoryRepository.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\repository\TicketCommentRepository.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\repository\TicketRepository.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\repository\UserRepository.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\security\CustomUserDetails.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\security\CustomUserDetailsService.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\security\RoleBasedAuthenticationSuccessHandler.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\service\AdminConfigService.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\service\AuditLogService.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\service\ChatbotService.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\service\FeedbackService.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\service\impl\AdminConfigServiceImpl.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\service\impl\ChatbotServiceImpl.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\service\impl\FeedbackServiceImpl.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\service\impl\KnowledgeBaseServiceImpl.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\service\impl\LostFoundServiceImpl.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\service\impl\NotificationServiceImpl.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\service\impl\RegistrationServiceImpl.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\service\impl\ReportingServiceImpl.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\service\impl\TicketServiceImpl.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\service\impl\UserServiceImpl.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\service\KnowledgeBaseService.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\service\LostFoundService.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\service\NotificationService.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\service\RegistrationService.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\service\ReportingService.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\service\TicketService.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\service\UserService.java
+C:\Users\LOQ\Desktop\university-help-desk\src\main\java\com\helpdesk\util\RoleRedirectResolver.java
