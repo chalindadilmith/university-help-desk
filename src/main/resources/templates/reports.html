@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:replace="~{fragments/layout :: layout('Reports', 'reports', ~{::section})}">
+<section>
+    <h1><i class="fa-solid fa-chart-line"></i> Reports</h1>
+    <p class="muted">Computed live from the database - ticket volume, resolution time, and satisfaction (UC-F5-01).</p>
+
+    <div class="card-grid">
+        <div class="card stat-card">
+            <span class="stat-icon"><i class="fa-solid fa-ticket"></i></span>
+            <div class="stat-body">
+                <div class="stat-value" th:text="${summary.totalTickets}"></div>
+                <div class="stat-label">Total Tickets</div>
+            </div>
+        </div>
+        <div class="card stat-card">
+            <span class="stat-icon"><i class="fa-solid fa-stopwatch"></i></span>
+            <div class="stat-body">
+                <div class="stat-value" th:text="${#numbers.formatDecimal(summary.averageResolutionHours, 1, 1)} + 'h'"></div>
+                <div class="stat-label">Avg. Resolution Time</div>
+            </div>
+        </div>
+        <div class="card stat-card">
+            <span class="stat-icon"><i class="fa-solid fa-star"></i></span>
+            <div class="stat-body">
+                <div class="stat-value" th:text="${summary.feedbackCount > 0} ? ${#numbers.formatDecimal(summary.averageSatisfactionRating, 1, 1)} + '/5' : 'N/A'"></div>
+                <div class="stat-label">Avg. Satisfaction (<span th:text="${summary.feedbackCount}"></span> ratings)</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section-title"><h2><i class="fa-solid fa-layer-group"></i> Tickets by Status</h2></div>
+    <table>
+        <thead><tr><th>Status</th><th>Count</th></tr></thead>
+        <tbody>
+        <tr th:each="entry : ${summary.countsByStatus}">
+            <td><span class="badge" th:classappend="'badge-' + ${entry.key.toLowerCase()}" th:text="${entry.key}"></span></td>
+            <td th:text="${entry.value}"></td>
+        </tr>
+        </tbody>
+    </table>
+</section>
+</div>
+</body>
+</html>

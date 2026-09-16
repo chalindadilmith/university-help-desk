@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:replace="~{fragments/layout :: layout('Ticket ' + ${ticket.ticketRef}, 'tickets', ~{::section})}">
+<section>
+    <a th:href="@{/staff/tickets}" class="back-link"><i class="fa-solid fa-arrow-left"></i> Back to Queue</a>
+    <div class="flex-between mt-1">
+        <h1><i class="fa-solid fa-ticket"></i> <span th:text="${ticket.subject}"></span></h1>
+        <span class="badge" th:classappend="'badge-' + ${ticket.status.name().toLowerCase()}" th:text="${ticket.status}"></span>
+    </div>
+    <p class="muted" th:text="${ticket.ticketRef} + ' &middot; ' + ${ticket.category.name} + ' &middot; Student: ' + ${ticket.student.fullName}"></p>
+
+    <div class="card">
+        <p th:text="${ticket.description}"></p>
+    </div>
+
+    <div class="card flex-between">
+        <form th:if="${ticket.assignedStaff == null}" th:action="@{/staff/tickets/{id}/assign(id=${ticket.id})}" method="post">
+            <button type="submit" class="btn"><i class="fa-solid fa-hand"></i> Assign to Me</button>
+        </form>
+        <form th:action="@{/staff/tickets/{id}/status(id=${ticket.id})}" method="post">
+            <select name="status" onchange="this.form.submit()">
+                <option value="">-- change status --</option>
+                <option value="IN_PROGRESS">In Progress</option>
+                <option value="RESOLVED">Resolved</option>
+                <option value="CLOSED">Closed</option>
+            </select>
+        </form>
+        <form th:action="@{/staff/tickets/{id}/escalate(id=${ticket.id})}" method="post">
+            <button type="submit" class="btn btn-secondary" onclick="return confirmAction('Escalate this ticket to senior staff?')"><i class="fa-solid fa-triangle-exclamation"></i> Escalate</button>
+        </form>
+    </div>
+
+    <div class="section-title"><h2><i class="fa-solid fa-comments"></i> Activity</h2></div>
+    <div class="card">
+        <div class="empty-state" th:if="${#lists.isEmpty(comments)}"><i class="fa-regular fa-comment-dots"></i>No replies yet.</div>
+        <div th:each="c : ${comments}" class="mt-1" style="border-bottom:1px solid var(--border-color); padding-bottom:0.6rem;">
+            <strong th:text="${c.author.fullName}"></strong>
+            <span class="muted" th:text="${' - ' + #temporals.format(c.createdAt, 'dd MMM, HH:mm')}"></span>
+            <span th:if="${c.resolutionNote}" class="badge badge-resolved">Resolution</span>
+            <p th:text="${c.comment}"></p>
+        </div>
+
+        <form th:action="@{/staff/tickets/{id}/comment(id=${ticket.id})}" method="post" class="mt-1">
+            <label for="comment">Add a reply</label>
+            <textarea id="comment" name="comment" required="required"></textarea>
+            <label><input type="checkbox" name="resolutionNote" value="true" style="width:auto; display:inline-block;"/> Mark as resolution note</label>
+            <button type="submit" class="btn mt-1"><i class="fa-solid fa-paper-plane"></i> Send Reply</button>
+        </form>
+    </div>
+</section>
+</div>
+</body>
+</html>

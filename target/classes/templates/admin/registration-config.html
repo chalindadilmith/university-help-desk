@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:replace="~{fragments/layout :: layout('Registration Setup', 'registration-config', ~{::section})}">
+<section>
+    <h1><i class="fa-solid fa-calendar-plus"></i> Semester Registration Setup</h1>
+    <div class="alert alert-error" th:if="${error}"><i class="fa-solid fa-circle-exclamation"></i><span th:text="${error}"></span></div>
+
+    <div class="card-grid" style="grid-template-columns: 1fr 1fr;">
+        <div class="card">
+            <h2><i class="fa-regular fa-calendar"></i> Semesters</h2>
+            <form th:action="@{/admin/registration-config/semesters}" th:object="${semesterForm}" method="post">
+                <label for="semName">Name</label>
+                <input type="text" id="semName" th:field="*{name}" placeholder="e.g. 2026 Semester 2"/>
+                <div class="form-row">
+                    <div><label for="startDate">Start</label><input type="date" id="startDate" th:field="*{startDate}"/></div>
+                    <div><label for="endDate">End</label><input type="date" id="endDate" th:field="*{endDate}"/></div>
+                </div>
+                <label style="font-weight:normal;"><input type="checkbox" th:field="*{registrationOpen}" style="width:auto; display:inline-block;"/> Registration open</label>
+                <button type="submit" class="btn btn-sm mt-1"><i class="fa-solid fa-plus"></i> Add Semester</button>
+            </form>
+            <table class="mt-1">
+                <thead><tr><th>Name</th><th>Open?</th></tr></thead>
+                <tbody>
+                <tr th:each="s : ${semesters}">
+                    <td th:text="${s.name}"></td>
+                    <td th:text="${s.registrationOpen} ? 'Yes' : 'No'"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card">
+            <h2><i class="fa-solid fa-book"></i> Courses</h2>
+            <form th:action="@{/admin/registration-config/courses}" th:object="${courseForm}" method="post">
+                <label for="courseCode">Code</label>
+                <input type="text" id="courseCode" th:field="*{code}" placeholder="e.g. SE2030"/>
+                <label for="courseName">Name</label>
+                <input type="text" id="courseName" th:field="*{name}"/>
+                <label for="credits">Credits</label>
+                <input type="number" id="credits" th:field="*{credits}"/>
+                <button type="submit" class="btn btn-sm"><i class="fa-solid fa-plus"></i> Add Course</button>
+            </form>
+            <table class="mt-1">
+                <thead><tr><th>Code</th><th>Name</th><th>Credits</th></tr></thead>
+                <tbody>
+                <tr th:each="c : ${courses}">
+                    <td th:text="${c.code}"></td>
+                    <td th:text="${c.name}"></td>
+                    <td th:text="${c.credits}"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="section-title"><h2><i class="fa-solid fa-layer-group"></i> Course Offerings (for the most recent semester)</h2></div>
+    <div class="card">
+        <form th:action="@{/admin/registration-config/offerings}" th:object="${offeringForm}" method="post" class="form-row" style="align-items:flex-end;">
+            <div>
+                <label for="offSemester">Semester</label>
+                <select id="offSemester" th:field="*{semesterId}">
+                    <option th:each="s : ${semesters}" th:value="${s.id}" th:text="${s.name}"></option>
+                </select>
+            </div>
+            <div>
+                <label for="offCourse">Course</label>
+                <select id="offCourse" th:field="*{courseId}">
+                    <option th:each="c : ${courses}" th:value="${c.id}" th:text="${c.code}"></option>
+                </select>
+            </div>
+            <div><label for="capacity">Capacity</label><input type="number" id="capacity" th:field="*{capacity}"/></div>
+            <div><label for="scheduleInfo">Schedule (free text)</label><input type="text" id="scheduleInfo" th:field="*{scheduleInfo}" placeholder="e.g. Mon/Wed 9-11am"/></div>
+            <div><button type="submit" class="btn"><i class="fa-solid fa-plus"></i> Add Offering</button></div>
+        </form>
+
+        <table class="mt-1">
+            <thead><tr><th>Course</th><th>Capacity</th><th>Schedule</th></tr></thead>
+            <tbody>
+            <tr th:each="o : ${offerings}">
+                <td th:text="${o.course.code} + ' - ' + ${o.course.name}"></td>
+                <td th:text="${o.capacity}"></td>
+                <td th:text="${o.scheduleInfo}"></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+</div>
+</body>
+</html>

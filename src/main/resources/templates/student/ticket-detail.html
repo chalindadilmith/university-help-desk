@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:replace="~{fragments/layout :: layout('Ticket ' + ${ticket.ticketRef}, 'tickets', ~{::section})}">
+<section>
+    <a th:href="@{/student/tickets}" class="back-link"><i class="fa-solid fa-arrow-left"></i> Back to My Tickets</a>
+    <div class="flex-between mt-1">
+        <h1><i class="fa-solid fa-ticket"></i> <span th:text="${ticket.subject}"></span></h1>
+        <span class="badge" th:classappend="'badge-' + ${ticket.status.name().toLowerCase()}" th:text="${ticket.status}"></span>
+    </div>
+    <p class="muted" th:text="${ticket.ticketRef} + ' &middot; ' + ${ticket.category.name} + ' &middot; Priority: ' + ${ticket.priority}"></p>
+
+    <div class="alert alert-success" th:if="${success}"><i class="fa-solid fa-circle-check"></i><span th:text="${success}"></span></div>
+    <div class="alert alert-error" th:if="${error}"><i class="fa-solid fa-circle-exclamation"></i><span th:text="${error}"></span></div>
+
+    <div class="card">
+        <p th:text="${ticket.description}"></p>
+        <p class="muted" th:if="${ticket.assignedStaff != null}"><i class="fa-solid fa-headset"></i> Handled by <span th:text="${ticket.assignedStaff.fullName}"></span></p>
+        <p class="muted" th:unless="${ticket.assignedStaff != null}"><i class="fa-regular fa-clock"></i> Not yet assigned to a staff member.</p>
+    </div>
+
+    <div class="section-title"><h2><i class="fa-solid fa-comments"></i> Activity</h2></div>
+    <div class="card">
+        <div class="empty-state" th:if="${#lists.isEmpty(comments)}"><i class="fa-regular fa-comment-dots"></i>No replies yet.</div>
+        <div th:each="c : ${comments}" class="mt-1" style="border-bottom:1px solid var(--border-color); padding-bottom:0.6rem;">
+            <strong th:text="${c.author.fullName}"></strong>
+            <span class="muted" th:text="${' - ' + #temporals.format(c.createdAt, 'dd MMM, HH:mm')}"></span>
+            <span th:if="${c.resolutionNote}" class="badge badge-resolved">Resolution</span>
+            <p th:text="${c.comment}"></p>
+        </div>
+    </div>
+
+    <div th:if="${ticket.status.name() == 'RESOLVED'}" class="card">
+        <form th:action="@{/student/tickets/{id}/reopen(id=${ticket.id})}" method="post">
+            <p>Not satisfied with the resolution?</p>
+            <button type="submit" class="btn btn-secondary" onclick="return confirmAction('Reopen this ticket?')"><i class="fa-solid fa-rotate-left"></i> Reopen Ticket</button>
+        </form>
+    </div>
+
+    <div th:if="${(ticket.status.name() == 'RESOLVED' or ticket.status.name() == 'CLOSED') and existingFeedback == null}" class="card">
+        <h2><i class="fa-solid fa-star"></i> Rate This Resolution</h2>
+        <form th:action="@{/student/tickets/{id}/feedback(id=${ticket.id})}" method="post">
+            <label for="rating">Rating (1-5)</label>
+            <select id="rating" name="rating">
+                <option value="5">5 - Excellent</option>
+                <option value="4">4 - Good</option>
+                <option value="3">3 - Okay</option>
+                <option value="2">2 - Poor</option>
+                <option value="1">1 - Very Poor</option>
+            </select>
+            <label for="comment">Comment (optional)</label>
+            <textarea id="comment" name="comment"></textarea>
+            <button type="submit" class="btn"><i class="fa-solid fa-paper-plane"></i> Submit Feedback</button>
+        </form>
+    </div>
+    <div th:if="${existingFeedback != null}" class="card">
+        <h2><i class="fa-solid fa-star"></i> Your Feedback</h2>
+        <p>Rating: <strong th:text="${existingFeedback.rating} + ' / 5'"></strong></p>
+        <p th:if="${existingFeedback.comment}" th:text="${existingFeedback.comment}"></p>
+    </div>
+</section>
+</div>
+</body>
+</html>

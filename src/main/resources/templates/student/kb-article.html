@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:replace="~{fragments/layout :: layout(${article.title}, 'kb', ~{::section})}">
+<section>
+    <a th:href="@{/student/kb}" class="back-link"><i class="fa-solid fa-arrow-left"></i> Back to Knowledge Base</a>
+    <h1 class="mt-1"><i class="fa-regular fa-file-lines"></i> <span th:text="${article.title}"></span></h1>
+    <p class="muted"><i class="fa-solid fa-tag"></i> <span th:text="${article.category.name} + ' &middot; ' + ${article.viewCount} + ' views'"></span></p>
+    <div class="card">
+        <p th:text="${article.content}" style="white-space: pre-wrap;"></p>
+    </div>
+    <p><i class="fa-regular fa-circle-question"></i> Didn't answer your question? <a th:href="@{/student/tickets}">Create a support ticket</a>.</p>
+</section>
+</div>
+</body>
+</html>

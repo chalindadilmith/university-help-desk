@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+<div th:replace="~{fragments/layout :: layout('Dashboard', 'dashboard', ~{::section})}">
+<section>
+    <h1><i class="fa-solid fa-gauge-high"></i> Welcome back, <span sec:authentication="name">Admin</span></h1>
+
+    <div class="card-grid">
+        <div class="card stat-card">
+            <span class="stat-icon"><i class="fa-solid fa-ticket"></i></span>
+            <div class="stat-body">
+                <div class="stat-value" th:text="${summary.totalTickets}"></div>
+                <div class="stat-label">Total Tickets</div>
+            </div>
+        </div>
+        <div class="card stat-card">
+            <span class="stat-icon"><i class="fa-solid fa-users-gear"></i></span>
+            <div class="stat-body">
+                <div class="stat-value" th:text="${staffAdminCount}"></div>
+                <div class="stat-label">Staff &amp; Admin Accounts</div>
+            </div>
+        </div>
+        <div class="card stat-card">
+            <span class="stat-icon"><i class="fa-solid fa-hand-holding-heart"></i></span>
+            <div class="stat-body">
+                <div class="stat-value" th:text="${pendingClaims}"></div>
+                <div class="stat-label">Pending L&amp;F Claims</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section-title"><h2><i class="fa-solid fa-bolt"></i> Quick Actions</h2></div>
+    <div class="card-grid">
+        <a class="card" th:href="@{/admin/users}"><span class="card-icon"><i class="fa-solid fa-users-gear"></i></span> Manage Users &amp; Staff</a>
+        <a class="card" th:href="@{/admin/config}"><span class="card-icon"><i class="fa-solid fa-route"></i></span> Ticket Routing Config</a>
+        <a class="card" th:href="@{/admin/registration-config}"><span class="card-icon"><i class="fa-solid fa-calendar-plus"></i></span> Registration Setup</a>
+        <a class="card" th:href="@{/admin/lost-found}"><span class="card-icon"><i class="fa-solid fa-hand-holding-heart"></i></span> Lost &amp; Found Claims</a>
+        <a class="card" th:href="@{/reports}"><span class="card-icon"><i class="fa-solid fa-chart-line"></i></span> View Reports</a>
+        <a class="card" th:href="@{/admin/audit-log}"><span class="card-icon"><i class="fa-solid fa-clock-rotate-left"></i></span> Audit Log</a>
+    </div>
+</section>
+</div>
+</body>
+</html>

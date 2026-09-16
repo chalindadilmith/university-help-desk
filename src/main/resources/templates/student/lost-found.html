@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:replace="~{fragments/layout :: layout('Lost &amp; Found', 'lost-found', ~{::section})}">
+<section>
+    <h1><i class="fa-solid fa-magnifying-glass-location"></i> Lost &amp; Found</h1>
+    <div class="alert alert-success" th:if="${param.reported}"><i class="fa-solid fa-circle-check"></i>Your report has been posted.</div>
+
+    <div class="card">
+        <h2><i class="fa-solid fa-circle-plus"></i> Report an Item</h2>
+        <form th:action="@{/student/lost-found/report}" th:object="${reportForm}" method="post">
+            <div class="form-row">
+                <div>
+                    <label for="itemType">Type</label>
+                    <select id="itemType" th:field="*{itemType}">
+                        <option value="LOST">Lost</option>
+                        <option value="FOUND">Found</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="itemDate">Date</label>
+                    <input type="date" id="itemDate" th:field="*{itemDate}"/>
+                    <span class="field-error" th:if="${#fields.hasErrors('itemDate')}" th:errors="*{itemDate}"></span>
+                </div>
+            </div>
+            <label for="description">Description</label>
+            <textarea id="description" th:field="*{description}" placeholder="e.g. Black backpack with laptop sticker"></textarea>
+            <span class="field-error" th:if="${#fields.hasErrors('description')}" th:errors="*{description}"></span>
+
+            <label for="location">Location</label>
+            <input type="text" id="location" th:field="*{location}" placeholder="e.g. Library, 2nd floor"/>
+            <span class="field-error" th:if="${#fields.hasErrors('location')}" th:errors="*{location}"></span>
+
+            <button type="submit" class="btn"><i class="fa-solid fa-paper-plane"></i> Submit Report</button>
+        </form>
+    </div>
+
+    <div class="section-title">
+        <h2><i class="fa-solid fa-magnifying-glass"></i> Search Listings</h2>
+    </div>
+    <div class="card">
+        <form th:action="@{/student/lost-found}" method="get" class="form-row" style="align-items:flex-end;">
+            <div>
+                <label for="type">Type</label>
+                <select id="type" name="type">
+                    <option value="">All</option>
+                    <option value="LOST" th:selected="${selectedType != null and selectedType.name() == 'LOST'}">Lost</option>
+                    <option value="FOUND" th:selected="${selectedType != null and selectedType.name() == 'FOUND'}">Found</option>
+                </select>
+            </div>
+            <div>
+                <label for="keyword">Keyword</label>
+                <input type="text" id="keyword" name="keyword" th:value="${keyword}" placeholder="e.g. backpack"/>
+            </div>
+            <div><button type="submit" class="btn btn-secondary"><i class="fa-solid fa-magnifying-glass"></i> Search</button></div>
+        </form>
+    </div>
+
+    <div class="empty-state" th:if="${#lists.isEmpty(items)}"><i class="fa-regular fa-folder-open"></i>No matching items found.</div>
+
+    <table th:unless="${#lists.isEmpty(items)}">
+        <thead><tr><th>Type</th><th>Description</th><th>Location</th><th>Date</th><th></th></tr></thead>
+        <tbody>
+        <tr th:each="item : ${items}">
+            <td><span class="badge" th:classappend="'badge-' + ${item.status.name().toLowerCase()}" th:text="${item.itemType}"></span></td>
+            <td th:text="${item.description}"></td>
+            <td th:text="${item.location}"></td>
+            <td th:text="${#temporals.format(item.itemDate, 'dd MMM yyyy')}"></td>
+            <td><a th:href="@{/student/lost-found/{id}(id=${item.id})}" class="btn btn-sm btn-outline"><i class="fa-regular fa-eye"></i> View</a></td>
+        </tr>
+        </tbody>
+    </table>
+</section>
+</div>
+</body>
+</html>

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:replace="~{fragments/layout :: layout('Semester Registration', 'registration', ~{::section})}">
+<section>
+    <h1><i class="fa-solid fa-calendar-check"></i> Semester Registration</h1>
+    <div class="alert alert-success" th:if="${success}"><i class="fa-solid fa-circle-check"></i><span th:text="${success}"></span></div>
+    <div class="alert alert-error" th:if="${error}"><i class="fa-solid fa-circle-exclamation"></i><span th:text="${error}"></span></div>
+
+    <div class="empty-state" th:if="${#lists.isEmpty(openSemesters)}"><i class="fa-regular fa-calendar-xmark"></i>Registration isn't open for any semester right now. Check back later.</div>
+
+    <div th:unless="${#lists.isEmpty(openSemesters)}" class="card">
+        <h2><i class="fa-solid fa-clipboard-list"></i> <span th:text="'Register for ' + ${selectedSemester.name}"></span></h2>
+
+        <div th:if="${existingRegistration != null}" class="alert alert-info">
+            <i class="fa-solid fa-circle-info"></i>
+            <span>You're already registered for this semester (status: <strong th:text="${existingRegistration.status}"></strong>).
+            Submitting again below will replace your course selection.</span>
+        </div>
+
+        <form th:action="@{/student/registration}" method="post">
+            <input type="hidden" name="semesterId" th:value="${selectedSemester.id}"/>
+            <div class="empty-state" th:if="${#lists.isEmpty(offerings)}"><i class="fa-regular fa-folder-open"></i>No courses have been offered for this semester yet.</div>
+            <div th:each="o : ${offerings}" style="margin-bottom:0.5rem;">
+                <label style="display:flex; align-items:center; gap:0.5rem; font-weight:normal;">
+                    <input type="checkbox" name="offeringIds" th:value="${o.id}" style="width:auto;"
+                           th:checked="${existingRegistration != null and existingRegistration.courseOfferings.contains(o)}"/>
+                    <span th:text="${o.course.code} + ' - ' + ${o.course.name} + ' (' + ${o.course.credits} + ' credits)'"></span>
+                    <span class="muted" th:if="${o.scheduleInfo}" th:text="' &middot; ' + ${o.scheduleInfo}"></span>
+                </label>
+            </div>
+            <button type="submit" class="btn mt-1" th:unless="${#lists.isEmpty(offerings)}"><i class="fa-solid fa-check"></i> Confirm Registration</button>
+        </form>
+        <p class="muted mt-1">Maximum 18 credits per semester. There is no payment step in this system.</p>
+    </div>
+
+    <div class="section-title"><h2><i class="fa-solid fa-clock-rotate-left"></i> My Registration History</h2></div>
+    <div class="empty-state" th:if="${#lists.isEmpty(myRegistrations)}"><i class="fa-regular fa-folder-open"></i>No past registrations.</div>
+    <table th:unless="${#lists.isEmpty(myRegistrations)}">
+        <thead><tr><th>Semester</th><th>Status</th><th>Courses</th></tr></thead>
+        <tbody>
+        <tr th:each="r : ${myRegistrations}">
+            <td th:text="${r.semester.name}"></td>
+            <td><span class="badge" th:classappend="'badge-' + ${r.status.name().toLowerCase()}" th:text="${r.status}"></span></td>
+            <td><span th:each="off, iter : ${r.courseOfferings}" th:text="${off.course.code} + (${iter.last} ? '' : ', ')"></span></td>
+        </tr>
+        </tbody>
+    </table>
+</section>
+</div>
+</body>
+</html>

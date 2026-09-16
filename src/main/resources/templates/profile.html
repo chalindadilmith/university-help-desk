@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:replace="~{fragments/layout :: layout('My Profile', 'profile', ~{::section})}">
+<section>
+    <h1><i class="fa-solid fa-user"></i> My Profile</h1>
+    <div class="alert alert-success" th:if="${success}"><i class="fa-solid fa-circle-check"></i><span th:text="${success}"></span></div>
+    <div class="card" style="max-width:480px;">
+        <form th:action="@{/profile}" method="post">
+            <label><i class="fa-solid fa-id-card"></i> University / Staff ID</label>
+            <input type="text" th:value="${user.universityId}" disabled="disabled"/>
+
+            <label><i class="fa-solid fa-envelope"></i> Email</label>
+            <input type="text" th:value="${user.email}" disabled="disabled"/>
+
+            <label><i class="fa-solid fa-shield-halved"></i> Role</label>
+            <input type="text" th:value="${user.role}" disabled="disabled"/>
+
+            <label for="fullName"><i class="fa-solid fa-signature"></i> Full Name</label>
+            <input type="text" id="fullName" name="fullName" th:value="${user.fullName}"/>
+
+            <button type="submit" class="btn"><i class="fa-solid fa-floppy-disk"></i> Save Changes</button>
+        </form>
+    </div>
+</section>
+</div>
+</body>
+</html>

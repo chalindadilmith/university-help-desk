@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:replace="~{fragments/layout :: layout('Manage FAQ', 'kb', ~{::section})}">
+<section>
+    <h1><i class="fa-solid fa-book-open-reader"></i> Manage Knowledge Base Articles</h1>
+
+    <div class="card">
+        <h2><i class="fa-solid fa-pen-to-square"></i> <span th:text="${articleForm.id != null} ? 'Edit Article' : 'New Article'"></span></h2>
+        <form th:action="@{/staff/kb}" th:object="${articleForm}" method="post">
+            <input type="hidden" th:field="*{id}"/>
+            <label for="title">Title</label>
+            <input type="text" id="title" th:field="*{title}"/>
+            <span class="field-error" th:if="${#fields.hasErrors('title')}"><i class="fa-solid fa-circle-exclamation"></i> <span th:errors="*{title}"></span></span>
+
+            <label for="categoryId">Category</label>
+            <select id="categoryId" th:field="*{categoryId}">
+                <option th:each="c : ${categories}" th:value="${c.id}" th:text="${c.name}"></option>
+            </select>
+
+            <label for="content">Content</label>
+            <textarea id="content" th:field="*{content}" style="min-height:160px;"></textarea>
+            <span class="field-error" th:if="${#fields.hasErrors('content')}"><i class="fa-solid fa-circle-exclamation"></i> <span th:errors="*{content}"></span></span>
+
+            <label for="status">Status</label>
+            <select id="status" th:field="*{status}">
+                <option value="PUBLISHED">Published</option>
+                <option value="DRAFT">Draft</option>
+            </select>
+
+            <button type="submit" class="btn"><i class="fa-solid fa-floppy-disk"></i> Save Article</button>
+        </form>
+    </div>
+
+    <div class="card">
+        <h3><i class="fa-solid fa-tags"></i> Add a Category</h3>
+        <form th:action="@{/staff/kb/categories}" method="post" class="form-row" style="align-items:flex-end;">
+            <div><label for="catName">Name</label><input type="text" id="catName" name="name"/></div>
+            <div><button type="submit" class="btn btn-sm btn-secondary"><i class="fa-solid fa-plus"></i> Add</button></div>
+        </form>
+    </div>
+
+    <div class="section-title"><h2><i class="fa-solid fa-list"></i> All Articles</h2></div>
+    <div class="empty-state" th:if="${#lists.isEmpty(articles)}"><i class="fa-regular fa-folder-open"></i>No articles yet - create your first one above.</div>
+    <table th:unless="${#lists.isEmpty(articles)}">
+        <thead><tr><th>Title</th><th>Category</th><th>Status</th><th>Views</th><th></th></tr></thead>
+        <tbody>
+        <tr th:each="a : ${articles}">
+            <td th:text="${a.title}"></td>
+            <td th:text="${a.category.name}"></td>
+            <td><span class="badge" th:classappend="'badge-' + ${a.status.name().toLowerCase()}" th:text="${a.status}"></span></td>
+            <td th:text="${a.viewCount}"></td>
+            <td>
+                <a th:href="@{/staff/kb(editId=${a.id})}" class="btn btn-sm btn-outline"><i class="fa-solid fa-pen"></i> Edit</a>
+                <form th:action="@{/staff/kb/{id}/delete(id=${a.id})}" method="post" style="display:inline;">
+                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirmAction('Remove this article?')"><i class="fa-solid fa-trash"></i> Remove</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</section>
+</div>
+</body>
+</html>

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:replace="~{fragments/layout :: layout('My Tickets', 'tickets', ~{::section})}">
+<section>
+    <h1><i class="fa-solid fa-ticket"></i> My Tickets</h1>
+
+    <div class="card">
+        <h2><i class="fa-solid fa-circle-plus"></i> Create a New Ticket</h2>
+        <div class="empty-state" th:if="${#lists.isEmpty(categories)}">
+            <i class="fa-regular fa-circle-question"></i>No ticket categories have been configured yet. Ask an Admin to set one up under Ticket Routing Config.
+        </div>
+        <form th:unless="${#lists.isEmpty(categories)}" th:action="@{/student/tickets}" th:object="${ticketForm}" method="post">
+            <label for="categoryId">Category</label>
+            <select id="categoryId" th:field="*{categoryId}">
+                <option th:each="c : ${categories}" th:value="${c.id}" th:text="${c.name}"></option>
+            </select>
+
+            <label for="subject">Subject</label>
+            <input type="text" id="subject" th:field="*{subject}"/>
+            <span class="field-error" th:if="${#fields.hasErrors('subject')}"><i class="fa-solid fa-circle-exclamation"></i> <span th:errors="*{subject}"></span></span>
+
+            <label for="description">Description</label>
+            <textarea id="description" th:field="*{description}"></textarea>
+            <span class="field-error" th:if="${#fields.hasErrors('description')}"><i class="fa-solid fa-circle-exclamation"></i> <span th:errors="*{description}"></span></span>
+
+            <button type="submit" class="btn"><i class="fa-solid fa-paper-plane"></i> Submit Ticket</button>
+        </form>
+    </div>
+
+    <div class="section-title"><h2><i class="fa-solid fa-clock-rotate-left"></i> History</h2></div>
+    <div class="empty-state" th:if="${#lists.isEmpty(tickets)}"><i class="fa-regular fa-folder-open"></i>You haven't raised any tickets yet.</div>
+    <table th:unless="${#lists.isEmpty(tickets)}">
+        <thead><tr><th>Ref</th><th>Subject</th><th>Category</th><th>Status</th><th>Created</th><th></th></tr></thead>
+        <tbody>
+        <tr th:each="t : ${tickets}">
+            <td th:text="${t.ticketRef}"></td>
+            <td th:text="${t.subject}"></td>
+            <td th:text="${t.category.name}"></td>
+            <td><span class="badge" th:classappend="'badge-' + ${t.status.name().toLowerCase()}" th:text="${t.status}"></span></td>
+            <td th:text="${#temporals.format(t.createdAt, 'dd MMM yyyy')}"></td>
+            <td><a th:href="@{/student/tickets/{id}(id=${t.id})}" class="btn btn-sm btn-outline"><i class="fa-regular fa-eye"></i> View</a></td>
+        </tr>
+        </tbody>
+    </table>
+</section>
+</div>
+</body>
+</html>

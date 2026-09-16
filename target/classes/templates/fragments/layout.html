@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:fragment="layout(title, activePage, content)">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title th:text="${title} + ' - University Help Desk'">University Help Desk</title>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+          referrerpolicy="no-referrer"/>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+    <!-- CSRF token exposed for the chatbot's fetch() AJAX call (forms get theirs automatically via thymeleaf-extras-springsecurity6) -->
+    <meta name="_csrf" th:content="${_csrf?.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf?.headerName}"/>
+    <!-- Applied before first paint so switching pages / reloading never flashes the wrong theme. -->
+    <script>
+        (function () {
+            try {
+                var saved = localStorage.getItem('hd-theme');
+                var theme = saved || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+                document.documentElement.setAttribute('data-theme', theme);
+            } catch (e) { /* private mode etc - default light */ }
+        })();
+    </script>
+</head>
+<body>
+<div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+        <span class="brand"><span class="brand-icon"><i class="fa-solid fa-headset"></i></span> Help Desk</span>
+
+        <div class="nav-group" sec:authorize="hasRole('STUDENT')">
+            <a th:href="@{/student/dashboard}" th:classappend="${activePage == 'dashboard'} ? 'active'"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+            <a th:href="@{/student/tickets}" th:classappend="${activePage == 'tickets'} ? 'active'"><i class="fa-solid fa-ticket"></i> My Tickets</a>
+            <a th:href="@{/student/kb}" th:classappend="${activePage == 'kb'} ? 'active'"><i class="fa-solid fa-book-open"></i> Knowledge Base</a>
+            <a th:href="@{/student/lost-found}" th:classappend="${activePage == 'lost-found'} ? 'active'"><i class="fa-solid fa-magnifying-glass-location"></i> Lost &amp; Found</a>
+            <a th:href="@{/student/registration}" th:classappend="${activePage == 'registration'} ? 'active'"><i class="fa-solid fa-calendar-check"></i> Registration</a>
+            <a th:href="@{/profile}" th:classappend="${activePage == 'profile'} ? 'active'"><i class="fa-solid fa-user"></i> My Profile</a>
+        </div>
+
+        <div class="nav-group" sec:authorize="hasRole('STAFF')">
+            <a th:href="@{/staff/dashboard}" th:classappend="${activePage == 'dashboard'} ? 'active'"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+            <a th:href="@{/staff/tickets}" th:classappend="${activePage == 'tickets'} ? 'active'"><i class="fa-solid fa-ticket"></i> Ticket Queue</a>
+            <a th:href="@{/staff/kb}" th:classappend="${activePage == 'kb'} ? 'active'"><i class="fa-solid fa-book-open-reader"></i> Manage FAQ</a>
+            <a th:href="@{/reports}" th:classappend="${activePage == 'reports'} ? 'active'"><i class="fa-solid fa-chart-line"></i> Reports</a>
+            <a th:href="@{/profile}" th:classappend="${activePage == 'profile'} ? 'active'"><i class="fa-solid fa-user"></i> My Profile</a>
+        </div>
+
+        <div class="nav-group" sec:authorize="hasRole('ADMIN')">
+            <a th:href="@{/admin/dashboard}" th:classappend="${activePage == 'dashboard'} ? 'active'"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+            <a th:href="@{/admin/users}" th:classappend="${activePage == 'users'} ? 'active'"><i class="fa-solid fa-users-gear"></i> Users &amp; Staff</a>
+            <a th:href="@{/admin/lost-found}" th:classappend="${activePage == 'lost-found'} ? 'active'"><i class="fa-solid fa-hand-holding-heart"></i> L&amp;F Claims</a>
+            <a th:href="@{/admin/config}" th:classappend="${activePage == 'config'} ? 'active'"><i class="fa-solid fa-route"></i> Ticket Routing</a>
+            <a th:href="@{/admin/registration-config}" th:classappend="${activePage == 'registration-config'} ? 'active'"><i class="fa-solid fa-calendar-plus"></i> Registration Setup</a>
+            <a th:href="@{/reports}" th:classappend="${activePage == 'reports'} ? 'active'"><i class="fa-solid fa-chart-line"></i> Reports</a>
+            <a th:href="@{/admin/audit-log}" th:classappend="${activePage == 'audit-log'} ? 'active'"><i class="fa-solid fa-clock-rotate-left"></i> Audit Log</a>
+            <a th:href="@{/profile}" th:classappend="${activePage == 'profile'} ? 'active'"><i class="fa-solid fa-user"></i> My Profile</a>
+        </div>
+    </aside>
+
+    <div class="main-column">
+        <header class="topbar">
+            <button class="icon-btn" id="menuToggle" title="Toggle menu" onclick="document.getElementById('sidebar').classList.toggle('open')">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+            <div class="user-info">
+                <button type="button" class="icon-btn" id="themeToggle" title="Toggle light / dark theme" onclick="toggleTheme()">
+                    <i class="fa-solid fa-moon" id="themeToggleIcon"></i>
+                </button>
+                <div class="notif-wrapper">
+                    <button type="button" class="icon-btn" onclick="toggleNotifDropdown()" title="Notifications">
+                        <i class="fa-solid fa-bell"></i>
+                        <span class="notif-count" th:if="${unreadNotifCount != null and unreadNotifCount > 0}" th:text="${unreadNotifCount}"></span>
+                    </button>
+                    <div class="notif-dropdown" id="notifDropdown">
+                        <div class="notif-dropdown-header"><i class="fa-solid fa-bell"></i> Notifications</div>
+                        <div th:if="${recentNotifications == null or #lists.isEmpty(recentNotifications)}" class="notif-item">
+                            <i class="fa-regular fa-circle-check"></i>
+                            <div>You're all caught up.</div>
+                        </div>
+                        <div class="notif-item" th:each="n : ${recentNotifications}" th:classappend="${!n.read} ? 'unread'">
+                            <i class="fa-solid fa-circle-info"></i>
+                            <div>
+                                <div th:text="${n.message}"></div>
+                                <div class="muted" th:text="${#temporals.format(n.createdAt, 'dd MMM, HH:mm')}"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <span class="role-badge" sec:authorize="hasRole('STUDENT')"><i class="fa-solid fa-graduation-cap"></i> Student</span>
+                <span class="role-badge" sec:authorize="hasRole('STAFF')"><i class="fa-solid fa-headset"></i> Staff</span>
+                <span class="role-badge" sec:authorize="hasRole('ADMIN')"><i class="fa-solid fa-shield-halved"></i> Admin</span>
+                <span class="user-name"><span class="avatar"><i class="fa-solid fa-circle-user"></i></span> <span sec:authentication="name">User</span></span>
+                <form th:action="@{/logout}" method="post" style="margin:0;">
+                    <button type="submit" class="icon-btn" title="Logout"><i class="fa-solid fa-arrow-right-from-bracket"></i></button>
+                </form>
+            </div>
+        </header>
+        <main class="content">
+            <div class="fade-in" th:replace="${content}"></div>
+        </main>
+    </div>
+</div>
+<script th:src="@{/js/app.js}"></script>
+</body>
+</html>

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:replace="~{fragments/layout :: layout('Ticket Routing Config', 'config', ~{::section})}">
+<section>
+    <h1><i class="fa-solid fa-route"></i> Ticket Routing Configuration</h1>
+    <p class="muted">Categories are grouped into staff work-pools; routing rules decide which pool a new ticket lands in based on category + priority.</p>
+    <div class="alert alert-error" th:if="${error}"><i class="fa-solid fa-circle-exclamation"></i><span th:text="${error}"></span></div>
+
+    <div class="card-grid" style="grid-template-columns: 1fr 1fr;">
+        <div class="card">
+            <h2><i class="fa-solid fa-tags"></i> Categories</h2>
+            <form th:action="@{/admin/config/categories}" th:object="${categoryForm}" method="post">
+                <label for="catName">Name</label>
+                <input type="text" id="catName" th:field="*{name}" placeholder="e.g. IT"/>
+                <label for="catPool">Assign to Pool (optional)</label>
+                <select id="catPool" th:field="*{poolId}">
+                    <option value="">-- none yet --</option>
+                    <option th:each="p : ${pools}" th:value="${p.id}" th:text="${p.name}"></option>
+                </select>
+                <button type="submit" class="btn btn-sm"><i class="fa-solid fa-plus"></i> Add Category</button>
+            </form>
+            <table class="mt-1">
+                <thead><tr><th>Name</th><th>Pool</th></tr></thead>
+                <tbody>
+                <tr th:each="c : ${categories}">
+                    <td th:text="${c.name}"></td>
+                    <td th:text="${c.pool != null ? c.pool.name : '-'}"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card">
+            <h2><i class="fa-solid fa-people-group"></i> Staff Work-Pools</h2>
+            <form th:action="@{/admin/config/pools}" th:object="${poolForm}" method="post">
+                <label for="poolName">Name</label>
+                <input type="text" id="poolName" th:field="*{name}" placeholder="e.g. IT Support Team"/>
+                <button type="submit" class="btn btn-sm"><i class="fa-solid fa-plus"></i> Add Pool</button>
+            </form>
+            <div th:each="p : ${pools}" class="mt-1" style="border-top:1px solid var(--border-color); padding-top:0.6rem;">
+                <strong th:text="${p.name}"></strong>
+                <div class="muted" th:if="${#lists.isEmpty(p.staffMembers)}"><i class="fa-regular fa-circle-question"></i> No staff assigned yet.</div>
+                <div th:each="s : ${p.staffMembers}" class="flex-between">
+                    <span th:text="${s.fullName}"></span>
+                    <form th:action="@{/admin/config/pools/{poolId}/staff/{staffId}/remove(poolId=${p.id},staffId=${s.id})}" method="post">
+                        <button type="submit" class="btn btn-sm btn-danger"><i class="fa-solid fa-xmark"></i> Remove</button>
+                    </form>
+                </div>
+                <form th:action="@{/admin/config/pools/{poolId}/staff(poolId=${p.id})}" method="post" class="form-row mt-1">
+                    <select name="staffUserId">
+                        <option th:each="s : ${staff}" th:value="${s.id}" th:text="${s.fullName}"></option>
+                    </select>
+                    <button type="submit" class="btn btn-sm btn-secondary"><i class="fa-solid fa-user-plus"></i> Assign</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="section-title"><h2><i class="fa-solid fa-sliders"></i> Routing Rules</h2></div>
+    <div class="card">
+        <form th:action="@{/admin/config/routing-rules}" th:object="${ruleForm}" method="post" class="form-row" style="align-items:flex-end;">
+            <div>
+                <label for="ruleCategory">Category</label>
+                <select id="ruleCategory" th:field="*{categoryId}">
+                    <option th:each="c : ${categories}" th:value="${c.id}" th:text="${c.name}"></option>
+                </select>
+            </div>
+            <div>
+                <label for="rulePriority">Priority</label>
+                <select id="rulePriority" th:field="*{priority}">
+                    <option th:each="p : ${priorities}" th:value="${p}" th:text="${p}"></option>
+                </select>
+            </div>
+            <div>
+                <label for="rulePool">Target Pool</label>
+                <select id="rulePool" th:field="*{targetPoolId}">
+                    <option th:each="p : ${pools}" th:value="${p.id}" th:text="${p.name}"></option>
+                </select>
+            </div>
+            <div><button type="submit" class="btn"><i class="fa-solid fa-plus"></i> Add Rule</button></div>
+        </form>
+
+        <table class="mt-1">
+            <thead><tr><th>Category</th><th>Priority</th><th>Target Pool</th><th></th></tr></thead>
+            <tbody>
+            <tr th:each="r : ${rules}">
+                <td th:text="${r.category.name}"></td>
+                <td th:text="${r.priority}"></td>
+                <td th:text="${r.targetPool.name}"></td>
+                <td>
+                    <form th:action="@{/admin/config/routing-rules/{id}/delete(id=${r.id})}" method="post">
+                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirmAction('Delete this rule?')"><i class="fa-solid fa-trash"></i> Delete</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+</div>
+</body>
+</html>

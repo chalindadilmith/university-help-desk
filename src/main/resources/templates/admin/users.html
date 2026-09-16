@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:replace="~{fragments/layout :: layout('Users &amp; Staff', 'users', ~{::section})}">
+<section>
+    <h1><i class="fa-solid fa-users-gear"></i> Users &amp; Staff</h1>
+    <div class="alert alert-success" th:if="${success}"><i class="fa-solid fa-circle-check"></i><span th:text="${success}"></span></div>
+
+    <div class="card">
+        <h2><i class="fa-solid fa-user-plus"></i> Create Staff / Admin Account</h2>
+        <p class="muted">There is no public signup for Staff or Admin accounts (Phase 0 decision) - this is the only way to create one. A temporary password is generated and shown once after creation; share it with the new account holder securely.</p>
+        <form th:action="@{/admin/users}" th:object="${staffForm}" method="post">
+            <div class="form-row">
+                <div>
+                    <label for="fullName">Full Name</label>
+                    <input type="text" id="fullName" th:field="*{fullName}"/>
+                    <span class="field-error" th:if="${#fields.hasErrors('fullName')}" th:errors="*{fullName}"></span>
+                </div>
+                <div>
+                    <label for="universityId">Staff ID</label>
+                    <input type="text" id="universityId" th:field="*{universityId}"/>
+                    <span class="field-error" th:if="${#fields.hasErrors('universityId')}" th:errors="*{universityId}"></span>
+                </div>
+            </div>
+            <div class="form-row">
+                <div>
+                    <label for="email">Email</label>
+                    <input type="email" id="email" th:field="*{email}"/>
+                    <span class="field-error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></span>
+                </div>
+                <div>
+                    <label for="role">Role</label>
+                    <select id="role" th:field="*{role}">
+                        <option value="STAFF">Help Desk Staff</option>
+                        <option value="ADMIN">System Admin</option>
+                    </select>
+                </div>
+            </div>
+            <button type="submit" class="btn"><i class="fa-solid fa-user-plus"></i> Create Account</button>
+        </form>
+    </div>
+
+    <div class="section-title"><h2><i class="fa-solid fa-list"></i> Existing Staff &amp; Admin Accounts</h2></div>
+    <table>
+        <thead><tr><th>Name</th><th>Staff ID</th><th>Email</th><th>Role</th><th>Status</th><th></th></tr></thead>
+        <tbody>
+        <tr th:each="u : ${users}">
+            <td th:text="${u.fullName}"></td>
+            <td th:text="${u.universityId}"></td>
+            <td th:text="${u.email}"></td>
+            <td th:text="${u.role}"></td>
+            <td><span class="badge" th:classappend="'badge-' + ${u.status.name().toLowerCase()}" th:text="${u.status}"></span></td>
+            <td>
+                <form th:if="${u.status.name() == 'ACTIVE'}" th:action="@{/admin/users/{id}/deactivate(id=${u.id})}" method="post" style="display:inline;">
+                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirmAction('Deactivate this account?')"><i class="fa-solid fa-user-slash"></i> Deactivate</button>
+                </form>
+                <form th:if="${u.status.name() == 'DEACTIVATED'}" th:action="@{/admin/users/{id}/activate(id=${u.id})}" method="post" style="display:inline;">
+                    <button type="submit" class="btn btn-sm btn-success"><i class="fa-solid fa-user-check"></i> Reactivate</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</section>
+</div>
+</body>
+</html>

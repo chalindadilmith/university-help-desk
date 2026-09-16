@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+<div th:replace="~{fragments/layout :: layout('Dashboard', 'dashboard', ~{::section})}">
+<section>
+    <h1><i class="fa-solid fa-gauge-high"></i> Welcome back, <span sec:authentication="name">Student</span></h1>
+
+    <div class="card-grid">
+        <div class="card stat-card">
+            <span class="stat-icon"><i class="fa-solid fa-ticket"></i></span>
+            <div class="stat-body">
+                <div class="stat-value" th:text="${totalTickets}"></div>
+                <div class="stat-label">Total Tickets Raised</div>
+            </div>
+        </div>
+        <div class="card stat-card">
+            <span class="stat-icon"><i class="fa-solid fa-hourglass-half"></i></span>
+            <div class="stat-body">
+                <div class="stat-value" th:text="${openTickets}"></div>
+                <div class="stat-label">Open / In Progress</div>
+            </div>
+        </div>
+        <div class="card stat-card">
+            <span class="stat-icon"><i class="fa-solid fa-calendar-check"></i></span>
+            <div class="stat-body">
+                <div class="stat-value" th:text="${hasOpenSemester} ? 'Open' : 'Closed'"></div>
+                <div class="stat-label">Semester Registration</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section-title"><h2><i class="fa-solid fa-bolt"></i> Quick Actions</h2></div>
+    <div class="card-grid">
+        <a class="card" th:href="@{/student/tickets}"><span class="card-icon"><i class="fa-solid fa-ticket"></i></span> Create a Support Ticket</a>
+        <a class="card" th:href="@{/student/kb}"><span class="card-icon"><i class="fa-solid fa-book-open"></i></span> Search Knowledge Base</a>
+        <a class="card" th:href="@{/student/lost-found}"><span class="card-icon"><i class="fa-solid fa-magnifying-glass-location"></i></span> Lost &amp; Found</a>
+        <a class="card" th:href="@{/student/registration}"><span class="card-icon"><i class="fa-solid fa-calendar-check"></i></span> Semester Registration</a>
+    </div>
+
+    <div class="section-title"><h2><i class="fa-solid fa-clock-rotate-left"></i> Recent Tickets</h2></div>
+    <div class="empty-state" th:if="${#lists.isEmpty(recentTickets)}"><i class="fa-regular fa-folder-open"></i>No tickets yet.</div>
+    <table th:unless="${#lists.isEmpty(recentTickets)}">
+        <thead><tr><th>Ref</th><th>Subject</th><th>Status</th></tr></thead>
+        <tbody>
+        <tr th:each="t : ${recentTickets}">
+            <td th:text="${t.ticketRef}"></td>
+            <td><a th:href="@{/student/tickets/{id}(id=${t.id})}" th:text="${t.subject}"></a></td>
+            <td><span class="badge" th:classappend="'badge-' + ${t.status.name().toLowerCase()}" th:text="${t.status}"></span></td>
+        </tr>
+        </tbody>
+    </table>
+</section>
+</div>
+</body>
+</html>

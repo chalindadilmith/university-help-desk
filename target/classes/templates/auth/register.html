@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Register - University Help Desk</title>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" referrerpolicy="no-referrer"/>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+<div class="auth-page">
+    <div class="auth-shell">
+        <div class="auth-visual">
+            <div class="auth-visual-inner">
+                <div class="auth-badge-row">
+                    <span class="floating-chip chip-1"><i class="fa-solid fa-graduation-cap"></i> For every student</span>
+                    <span class="floating-chip chip-2"><i class="fa-solid fa-calendar-check"></i> Instant registration</span>
+                    <span class="floating-chip chip-3"><i class="fa-solid fa-list-check"></i> Track every step</span>
+                </div>
+
+                <svg class="auth-illustration" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="authIllusTitleReg">
+                    <title id="authIllusTitleReg">Illustration of a student profile card with a checklist and a plus badge</title>
+                    <circle cx="330" cy="60" r="80" fill="#ffffff" opacity="0.07"/>
+                    <circle cx="60" cy="240" r="70" fill="#ffffff" opacity="0.08"/>
+
+                    <g class="ai-float-slow">
+                        <rect x="70" y="60" width="220" height="150" rx="16" fill="#ffffff" opacity="0.16"/>
+                        <circle cx="115" cy="110" r="24" fill="#ffffff" opacity="0.55"/>
+                        <rect x="150" y="98" width="110" height="10" rx="5" fill="#ffffff" opacity="0.55"/>
+                        <rect x="150" y="116" width="80" height="8" rx="4" fill="#ffffff" opacity="0.35"/>
+                        <rect x="95" y="160" width="170" height="8" rx="4" fill="#ffffff" opacity="0.3"/>
+                        <rect x="95" y="178" width="170" height="8" rx="4" fill="#ffffff" opacity="0.3"/>
+                    </g>
+
+                    <g class="ai-float">
+                        <rect x="30" y="195" width="130" height="70" rx="14" fill="#ffffff"/>
+                        <circle cx="55" cy="215" r="6" fill="#22c55e"/>
+                        <path d="M51 215 l3 3 l6 -7" stroke="#ffffff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                        <rect x="70" y="211" width="70" height="8" rx="4" fill="#e2e8f0"/>
+                        <circle cx="55" cy="238" r="6" fill="#22c55e"/>
+                        <path d="M51 238 l3 3 l6 -7" stroke="#ffffff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                        <rect x="70" y="234" width="55" height="8" rx="4" fill="#e2e8f0"/>
+                    </g>
+
+                    <g class="ai-float-rev">
+                        <circle cx="300" cy="215" r="32" fill="#7c3aed"/>
+                        <rect x="292" y="200" width="6" height="30" rx="3" fill="#ffffff"/>
+                        <rect x="285" y="207" width="30" height="6" rx="3" fill="#ffffff"/>
+                    </g>
+                </svg>
+
+                <h2 class="auth-visual-title">Join in a couple of minutes</h2>
+                <p class="auth-visual-copy">Create your account to raise tickets, browse the knowledge base and register for semesters online.</p>
+            </div>
+        </div>
+
+        <div class="auth-form-panel">
+            <div class="auth-card" style="max-width:440px;">
+                <span class="auth-icon"><i class="fa-solid fa-user-plus"></i></span>
+                <h1>Student Registration</h1>
+
+                <form th:action="@{/register}" th:object="${registerForm}" method="post">
+                    <label for="fullName"><i class="fa-solid fa-signature"></i> Full Name</label>
+                    <input type="text" id="fullName" th:field="*{fullName}"/>
+                    <span class="field-error" th:if="${#fields.hasErrors('fullName')}"><i class="fa-solid fa-circle-exclamation"></i> <span th:errors="*{fullName}"></span></span>
+
+                    <label for="universityId"><i class="fa-solid fa-id-card"></i> University ID</label>
+                    <input type="text" id="universityId" th:field="*{universityId}"/>
+                    <span class="field-error" th:if="${#fields.hasErrors('universityId')}"><i class="fa-solid fa-circle-exclamation"></i> <span th:errors="*{universityId}"></span></span>
+
+                    <label for="email"><i class="fa-solid fa-envelope"></i> Email</label>
+                    <input type="email" id="email" th:field="*{email}"/>
+                    <span class="field-error" th:if="${#fields.hasErrors('email')}"><i class="fa-solid fa-circle-exclamation"></i> <span th:errors="*{email}"></span></span>
+
+                    <label for="password"><i class="fa-solid fa-lock"></i> Password</label>
+                    <input type="password" id="password" th:field="*{password}"/>
+                    <span class="field-error" th:if="${#fields.hasErrors('password')}"><i class="fa-solid fa-circle-exclamation"></i> <span th:errors="*{password}"></span></span>
+
+                    <label for="confirmPassword"><i class="fa-solid fa-lock"></i> Confirm Password</label>
+                    <input type="password" id="confirmPassword" th:field="*{confirmPassword}"/>
+                    <span class="field-error" th:if="${#fields.hasErrors('confirmPassword')}"><i class="fa-solid fa-circle-exclamation"></i> <span th:errors="*{confirmPassword}"></span></span>
+
+                    <button type="submit" class="btn" style="width:100%;"><i class="fa-solid fa-user-plus"></i> Register</button>
+                </form>
+                <p class="mt-1">Already have an account? <a th:href="@{/login}">Login here</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+<script th:src="@{/js/app.js}"></script>
+</body>
+</html>

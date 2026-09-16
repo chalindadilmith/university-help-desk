@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:replace="~{fragments/layout :: layout('Ticket Queue', 'tickets', ~{::section})}">
+<section>
+    <h1><i class="fa-solid fa-ticket"></i> Ticket Queue</h1>
+    <p class="muted">Tickets already assigned to you, plus unassigned tickets in your work-pool's categories.</p>
+
+    <div class="empty-state" th:if="${#lists.isEmpty(tickets)}"><i class="fa-regular fa-circle-check"></i>Nothing in your queue right now.</div>
+    <table th:unless="${#lists.isEmpty(tickets)}">
+        <thead><tr><th>Ref</th><th>Subject</th><th>Category</th><th>Priority</th><th>Status</th><th>Student</th><th></th></tr></thead>
+        <tbody>
+        <tr th:each="t : ${tickets}">
+            <td th:text="${t.ticketRef}"></td>
+            <td th:text="${t.subject}"></td>
+            <td th:text="${t.category.name}"></td>
+            <td th:text="${t.priority}"></td>
+            <td><span class="badge" th:classappend="'badge-' + ${t.status.name().toLowerCase()}" th:text="${t.status}"></span></td>
+            <td th:text="${t.student.fullName}"></td>
+            <td><a th:href="@{/staff/tickets/{id}(id=${t.id})}" class="btn btn-sm btn-outline"><i class="fa-regular fa-eye"></i> Open</a></td>
+        </tr>
+        </tbody>
+    </table>
+</section>
+</div>
+</body>
+</html>

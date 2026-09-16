@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:replace="~{fragments/layout :: layout('Item Detail', 'lost-found', ~{::section})}">
+<section>
+    <a th:href="@{/student/lost-found}" class="back-link"><i class="fa-solid fa-arrow-left"></i> Back to Lost &amp; Found</a>
+    <h1 class="mt-1"><i class="fa-solid fa-box-open"></i> <span th:text="${item.description}"></span></h1>
+
+    <div class="alert alert-success" th:if="${success}"><i class="fa-solid fa-circle-check"></i><span th:text="${success}"></span></div>
+    <div class="alert alert-error" th:if="${error}"><i class="fa-solid fa-circle-exclamation"></i><span th:text="${error}"></span></div>
+
+    <div class="card">
+        <p><span class="badge" th:classappend="'badge-' + ${item.status.name().toLowerCase()}" th:text="${item.itemType}"></span>
+           <span class="badge" th:classappend="'badge-' + ${item.status.name().toLowerCase()}" th:text="${item.status}"></span></p>
+        <p><i class="fa-solid fa-location-dot"></i> <strong>Location:</strong> <span th:text="${item.location}"></span></p>
+        <p><i class="fa-regular fa-calendar"></i> <strong>Date:</strong> <span th:text="${#temporals.format(item.itemDate, 'dd MMM yyyy')}"></span></p>
+        <p><i class="fa-solid fa-user"></i> <strong>Reported by:</strong> <span th:text="${item.reporter.fullName}"></span></p>
+
+        <form th:if="${item.status.name() == 'ACTIVE'}" th:action="@{/student/lost-found/{id}/claim(id=${item.id})}" method="post" class="mt-1">
+            <button type="submit" class="btn" onclick="return confirmAction('Submit a claim on this item?')"><i class="fa-solid fa-hand"></i> This is mine / I found this</button>
+        </form>
+    </div>
+</section>
+</div>
+</body>
+</html>
