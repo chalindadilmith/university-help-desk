@@ -38,6 +38,11 @@ public class KbArticle {
     @Column(name = "title", nullable = false, length = 200)
     private String title;
 
+    // Not @Lob: Hibernate 6 maps @Lob String fields to CLOB, which its
+    // stricter function-argument validation then refuses to pass to LOWER()
+    // in KbArticleRepository.search(...). columnDefinition = "TEXT" alone
+    // still gives us a MySQL TEXT column, just mapped as a plain String
+    // (VARCHAR-like) type that LOWER()/LIKE work with normally.
     @NotBlank
     @Column(name = "content", nullable = false, columnDefinition = "TEXT")
     private String content;
