@@ -3,10 +3,10 @@
 <body>
 <div th:replace="~{fragments/layout :: layout('Lost &amp; Found Claims', 'lost-found', ~{::section})}">
 <section>
-    <h1><i class="fa-solid fa-hand-holding-heart"></i> Pending Lost &amp; Found Claims</h1>
+    <h1>Pending Lost &amp; Found Claims</h1>
     <p class="muted">Verify ownership before telling the reporter to hand the item over (UC-F1-01).</p>
 
-    <div class="empty-state" th:if="${#lists.isEmpty(claims)}"><i class="fa-regular fa-circle-check"></i>No pending claims.</div>
+    <div class="empty-state" th:if="${#lists.isEmpty(claims)}">No pending claims.</div>
 
     <table th:unless="${#lists.isEmpty(claims)}">
         <thead><tr><th>Item</th><th>Claimant</th><th>Reporter</th><th>Submitted</th><th></th></tr></thead>
@@ -18,10 +18,10 @@
             <td th:text="${#temporals.format(c.createdAt, 'dd MMM, HH:mm')}"></td>
             <td>
                 <form th:action="@{/admin/lost-found/{id}/approve(id=${c.id})}" method="post" style="display:inline;">
-                    <button type="submit" class="btn btn-sm btn-success"><i class="fa-solid fa-check"></i> Verify</button>
+                    <button type="submit" class="btn btn-sm btn-success">Verify</button>
                 </form>
                 <form th:action="@{/admin/lost-found/{id}/reject(id=${c.id})}" method="post" style="display:inline;">
-                    <button type="submit" class="btn btn-sm btn-danger"><i class="fa-solid fa-xmark"></i> Reject</button>
+                    <button type="submit" class="btn btn-sm btn-danger">Reject</button>
                 </form>
             </td>
         </tr>

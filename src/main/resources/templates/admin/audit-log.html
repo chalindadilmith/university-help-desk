@@ -3,11 +3,10 @@
 <body>
 <div th:replace="~{fragments/layout :: layout('Audit Log', 'audit-log', ~{::section})}">
 <section>
-    <h1><i class="fa-solid fa-clock-rotate-left"></i> Audit Log</h1>
+    <h1>Audit Log</h1>
     <p class="muted">Every administrative action, most recent first (UC-02).</p>
 
-    <div class="empty-state" th:if="${#lists.isEmpty(logs)}"><i class="fa-regular fa-folder-open"></i>No audit entries yet.</div>
-    <table th:unless="${#lists.isEmpty(logs)}">
+    <table>
         <thead><tr><th>When</th><th>Actor</th><th>Action</th><th>Target</th><th>Details</th></tr></thead>
         <tbody>
         <tr th:each="log : ${logs}">

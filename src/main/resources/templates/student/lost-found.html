@@ -3,11 +3,11 @@
 <body>
 <div th:replace="~{fragments/layout :: layout('Lost &amp; Found', 'lost-found', ~{::section})}">
 <section>
-    <h1><i class="fa-solid fa-magnifying-glass-location"></i> Lost &amp; Found</h1>
-    <div class="alert alert-success" th:if="${param.reported}"><i class="fa-solid fa-circle-check"></i>Your report has been posted.</div>
+    <h1>Lost &amp; Found</h1>
+    <div class="alert alert-success" th:if="${param.reported}">Your report has been posted.</div>
 
     <div class="card">
-        <h2><i class="fa-solid fa-circle-plus"></i> Report an Item</h2>
+        <h2>Report an Item</h2>
         <form th:action="@{/student/lost-found/report}" th:object="${reportForm}" method="post">
             <div class="form-row">
                 <div>
@@ -31,12 +31,12 @@
             <input type="text" id="location" th:field="*{location}" placeholder="e.g. Library, 2nd floor"/>
             <span class="field-error" th:if="${#fields.hasErrors('location')}" th:errors="*{location}"></span>
 
-            <button type="submit" class="btn"><i class="fa-solid fa-paper-plane"></i> Submit Report</button>
+            <button type="submit" class="btn">Submit Report</button>
         </form>
     </div>
 
     <div class="section-title">
-        <h2><i class="fa-solid fa-magnifying-glass"></i> Search Listings</h2>
+        <h2>Search Listings</h2>
     </div>
     <div class="card">
         <form th:action="@{/student/lost-found}" method="get" class="form-row" style="align-items:flex-end;">
@@ -52,11 +52,11 @@
                 <label for="keyword">Keyword</label>
                 <input type="text" id="keyword" name="keyword" th:value="${keyword}" placeholder="e.g. backpack"/>
             </div>
-            <div><button type="submit" class="btn btn-secondary"><i class="fa-solid fa-magnifying-glass"></i> Search</button></div>
+            <div><button type="submit" class="btn btn-secondary">Search</button></div>
         </form>
     </div>
 
-    <div class="empty-state" th:if="${#lists.isEmpty(items)}"><i class="fa-regular fa-folder-open"></i>No matching items found.</div>
+    <div class="empty-state" th:if="${#lists.isEmpty(items)}">No matching items found.</div>
 
     <table th:unless="${#lists.isEmpty(items)}">
         <thead><tr><th>Type</th><th>Description</th><th>Location</th><th>Date</th><th></th></tr></thead>
@@ -66,7 +66,7 @@
             <td th:text="${item.description}"></td>
             <td th:text="${item.location}"></td>
             <td th:text="${#temporals.format(item.itemDate, 'dd MMM yyyy')}"></td>
-            <td><a th:href="@{/student/lost-found/{id}(id=${item.id})}" class="btn btn-sm btn-outline"><i class="fa-regular fa-eye"></i> View</a></td>
+            <td><a th:href="@{/student/lost-found/{id}(id=${item.id})}" class="btn btn-sm btn-outline">View</a></td>
         </tr>
         </tbody>
     </table>
