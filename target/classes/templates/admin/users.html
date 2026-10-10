@@ -5,10 +5,11 @@
 <section>
     <h1><i class="fa-solid fa-users-gear"></i> Users &amp; Staff</h1>
     <div class="alert alert-success" th:if="${success}"><i class="fa-solid fa-circle-check"></i><span th:text="${success}"></span></div>
+    <div class="alert alert-error" th:if="${error}"><i class="fa-solid fa-circle-exclamation"></i><span th:text="${error}"></span></div>
 
     <div class="card">
-        <h2><i class="fa-solid fa-user-plus"></i> Create Staff / Admin Account</h2>
-        <p class="muted">There is no public signup for Staff or Admin accounts (Phase 0 decision) - this is the only way to create one. A temporary password is generated and shown once after creation; share it with the new account holder securely.</p>
+        <h2><i class="fa-solid fa-user-plus"></i> Create Staff Account</h2>
+        <p class="muted">There is no public signup for Staff accounts (Phase 0 decision) - this is the only way to create one. Choose which work pool(s) they belong to afterwards on the <a href="/admin/pools">Staff Work Pools</a> page. A temporary password is generated and shown once after creation; share it with the new account holder securely.</p>
         <form th:action="@{/admin/users}" th:object="${staffForm}" method="post">
             <div class="form-row">
                 <div>
@@ -28,30 +29,38 @@
                     <input type="email" id="email" th:field="*{email}"/>
                     <span class="field-error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></span>
                 </div>
-                <div>
-                    <label for="role">Role</label>
-                    <select id="role" th:field="*{role}">
-                        <option value="STAFF">Help Desk Staff</option>
-                        <option value="ADMIN">System Admin</option>
-                    </select>
-                </div>
             </div>
             <button type="submit" class="btn"><i class="fa-solid fa-user-plus"></i> Create Account</button>
         </form>
     </div>
 
-    <div class="section-title"><h2><i class="fa-solid fa-list"></i> Existing Staff &amp; Admin Accounts</h2></div>
-    <table>
-        <thead><tr><th>Name</th><th>Staff ID</th><th>Email</th><th>Role</th><th>Status</th><th></th></tr></thead>
+    <div class="section-title"><h2><i class="fa-solid fa-list"></i> All Accounts</h2></div>
+    <form th:action="@{/admin/users}" method="get" class="form-row">
+        <div>
+            <input type="text" name="keyword" th:value="${keyword}" placeholder="Search name, email, ID or student ID"/>
+        </div>
+        <div><button type="submit" class="btn"><i class="fa-solid fa-magnifying-glass"></i> Search</button></div>
+    </form>
+    <div class="empty-state" th:if="${#lists.isEmpty(users)}"><i class="fa-regular fa-circle-question"></i>No matching accounts.</div>
+    <table th:unless="${#lists.isEmpty(users)}">
+        <thead><tr><th>Name</th><th>ID</th><th>Email</th><th>Work pool(s)</th><th>Status</th><th>Actions</th></tr></thead>
         <tbody>
         <tr th:each="u : ${users}">
             <td th:text="${u.fullName}"></td>
-            <td th:text="${u.universityId}"></td>
+            <td><span th:text="${u.universityId}"></span><br/><small class="muted" th:if="${u.studentCode != null}" th:text="${u.studentCode}"></small></td>
             <td th:text="${u.email}"></td>
-            <td th:text="${u.role}"></td>
+            <td>
+                <span th:if="${poolsByUser.get(u.id) != null}" th:text="${#strings.listJoin(poolsByUser.get(u.id), ', ')}"></span>
+                <span th:if="${poolsByUser.get(u.id) == null}" class="muted">-</span>
+            </td>
             <td><span class="badge" th:classappend="'badge-' + ${u.status.name().toLowerCase()}" th:text="${u.status}"></span></td>
             <td>
-                <form th:if="${u.status.name() == 'ACTIVE'}" th:action="@{/admin/users/{id}/deactivate(id=${u.id})}" method="post" style="display:inline;">
+                <a th:href="@{/reports/users/{id}(id=${u.id})}" class="btn btn-sm btn-outline"><i class="fa-solid fa-id-card"></i> Report</a>
+                <a th:href="@{/admin/users/{id}/edit(id=${u.id})}" class="btn btn-sm btn-outline"><i class="fa-solid fa-pen"></i> Edit</a>
+                <form th:if="${u.id != currentUserId}" th:action="@{/admin/users/{id}/reset-password(id=${u.id})}" method="post" style="display:inline;">
+                    <button type="submit" class="btn btn-sm" onclick="return confirmAction('Reset this user\'s password? A new temporary password will be shown once.')"><i class="fa-solid fa-key"></i> Reset password</button>
+                </form>
+                <form th:if="${u.status.name() == 'ACTIVE' and u.id != currentUserId}" th:action="@{/admin/users/{id}/deactivate(id=${u.id})}" method="post" style="display:inline;">
                     <button type="submit" class="btn btn-sm btn-danger" onclick="return confirmAction('Deactivate this account?')"><i class="fa-solid fa-user-slash"></i> Deactivate</button>
                 </form>
                 <form th:if="${u.status.name() == 'DEACTIVATED'}" th:action="@{/admin/users/{id}/activate(id=${u.id})}" method="post" style="display:inline;">

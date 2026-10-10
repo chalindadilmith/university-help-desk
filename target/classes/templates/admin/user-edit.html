@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:replace="~{fragments/layout :: layout('Edit User', 'users', ~{::section})}">
+<section>
+    <a th:href="@{/admin/users}" class="back-link"><i class="fa-solid fa-arrow-left"></i> Back to Users &amp; Staff</a>
+    <h1 class="mt-1"><i class="fa-solid fa-user-pen"></i> Edit account</h1>
+    <div class="card">
+        <form th:action="@{/admin/users/{id}/edit(id=${editUser.id})}" th:object="${userForm}" method="post">
+            <div class="form-row">
+                <div>
+                    <label for="fullName">Full Name</label>
+                    <input type="text" id="fullName" th:field="*{fullName}"/>
+                    <span class="field-error" th:if="${#fields.hasErrors('fullName')}" th:errors="*{fullName}"></span>
+                </div>
+                <div>
+                    <label for="universityId">University / Staff ID</label>
+                    <input type="text" id="universityId" th:field="*{universityId}"/>
+                    <span class="field-error" th:if="${#fields.hasErrors('universityId')}" th:errors="*{universityId}"></span>
+                </div>
+            </div>
+            <div class="form-row">
+                <div>
+                    <label for="email">Email</label>
+                    <input type="email" id="email" th:field="*{email}"/>
+                    <span class="field-error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></span>
+                </div>
+            </div>
+            <p class="muted">A staff member's role is the work pool(s) they belong to - change that on the <a href="/admin/pools">Staff Work Pools</a> page.</p>
+            <button type="submit" class="btn"><i class="fa-solid fa-floppy-disk"></i> Save changes</button>
+            <a th:href="@{/admin/users}" class="btn btn-outline">Cancel</a>
+        </form>
+    </div>
+</section>
+</div>
+</body>
+</html>

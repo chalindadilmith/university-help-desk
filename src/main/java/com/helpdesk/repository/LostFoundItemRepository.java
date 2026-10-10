@@ -3,7 +3,9 @@ package com.helpdesk.repository;
 import com.helpdesk.entity.ItemStatus;
 import com.helpdesk.entity.ItemType;
 import com.helpdesk.entity.LostFoundItem;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -22,4 +24,9 @@ public interface LostFoundItemRepository extends JpaRepository<LostFoundItem, Lo
                                 @Param("keyword") String keyword);
 
     List<LostFoundItem> findByReporterIdOrderByCreatedAtDesc(Long reporterId);
+
+    /** Locks the row so two admins cannot verify two claims on the same item at once. */
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT i FROM LostFoundItem i WHERE i.id = :id")
+    java.util.Optional<LostFoundItem> lockById(@Param("id") Long id);
 }

@@ -1,5 +1,7 @@
 package com.helpdesk.controller;
 
+import com.helpdesk.entity.User;
+import com.helpdesk.exception.BusinessRuleException;
 import com.helpdesk.security.CustomUserDetails;
 import com.helpdesk.service.UserService;
 import jakarta.validation.constraints.NotBlank;
@@ -27,6 +29,24 @@ public class ProfileController {
     public String view(@AuthenticationPrincipal CustomUserDetails principal, Model model) {
         model.addAttribute("user", userService.getById(principal.getUser().getId()));
         return "profile";
+    }
+
+    @PostMapping("/password")
+    public String changePassword(@RequestParam String oldPassword,
+                                  @RequestParam String newPassword,
+                                  @RequestParam String confirmPassword,
+                                  @AuthenticationPrincipal CustomUserDetails principal,
+                                  RedirectAttributes redirectAttributes) {
+        try {
+            User updated = userService.changePassword(principal.getUser().getId(), oldPassword, newPassword, confirmPassword);
+            // keep the session's cached copy in step so nothing still treats the password as temporary
+            principal.getUser().setPasswordHash(updated.getPasswordHash());
+            principal.getUser().setMustChangePassword(false);
+            redirectAttributes.addFlashAttribute("success", "Password changed.");
+        } catch (BusinessRuleException e) {
+            redirectAttributes.addFlashAttribute("passwordError", e.getMessage());
+        }
+        return "redirect:/profile";
     }
 
     @PostMapping

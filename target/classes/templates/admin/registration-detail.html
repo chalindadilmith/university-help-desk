@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:replace="~{fragments/layout :: layout('Review Registration', 'registrations', ~{::section})}">
+<section>
+    <p><a th:href="@{/admin/registrations}"><i class="fa-solid fa-arrow-left"></i> Back to approvals</a></p>
+    <h1><i class="fa-solid fa-file-lines"></i> Registration <span th:text="${registration.referenceNo}"></span>
+        <span class="badge" th:classappend="'badge-' + ${registration.status.name().toLowerCase()}" th:text="${registration.status}"></span></h1>
+    <div class="alert alert-error" th:if="${error}"><i class="fa-solid fa-circle-exclamation"></i><span th:text="${error}"></span></div>
+
+    <div class="card-grid" style="grid-template-columns: 1fr 1fr;">
+        <div class="card">
+            <h2><i class="fa-solid fa-id-card"></i> Student</h2>
+            <div class="detail-grid">
+                <div><span class="muted">Name</span><strong th:text="${registration.student.fullName}"></strong></div>
+                <div><span class="muted">Student ID</span><strong th:text="${registration.student.studentCode}"></strong></div>
+                <div><span class="muted">University Reg. No.</span><span th:text="${registration.student.universityId}"></span></div>
+                <div><span class="muted">Email</span><span th:text="${registration.student.email}"></span></div>
+                <div><span class="muted">Contact</span><span th:text="${registration.contactNumber}"></span></div>
+                <div><span class="muted">Account</span><span class="badge" th:classappend="'badge-' + ${registration.student.status.name().toLowerCase()}" th:text="${registration.student.status}"></span></div>
+            </div>
+        </div>
+        <div class="card">
+            <h2><i class="fa-solid fa-graduation-cap"></i> Academic</h2>
+            <div class="detail-grid">
+                <div><span class="muted">Semester</span><strong th:text="${registration.semester.name}"></strong></div>
+                <div><span class="muted">Specialisation</span><span th:text="${registration.specialisation != null} ? ${registration.specialisation.name} : '-'"></span></div>
+                <div><span class="muted">Academic Year</span><span th:text="${registration.academicYear != null} ? 'Year ' + ${registration.academicYear} : '-'"></span></div>
+                <div><span class="muted">Semester of Study</span><span th:text="${registration.semesterOfStudy != null} ? 'Semester ' + ${registration.semesterOfStudy} : '-'"></span></div>
+                <div><span class="muted">Submitted</span><span th:text="${#temporals.format(registration.createdAt, 'dd MMM yyyy, HH:mm')}"></span></div>
+                <div><span class="muted">Total Credits</span><strong th:text="${registration.totalCredits}"></strong></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section-title"><h2><i class="fa-solid fa-book"></i> Selected Modules</h2></div>
+    <table>
+        <thead><tr><th>Code</th><th>Module</th><th>Year</th><th>Specialisation</th><th>Credits</th><th>Schedule</th></tr></thead>
+        <tbody>
+        <tr th:each="o : ${registration.courseOfferings}">
+            <td th:text="${o.course.code}"></td>
+            <td th:text="${o.course.name}"></td>
+            <td th:text="${o.course.yearLevel != null} ? 'Year ' + ${o.course.yearLevel} : 'Any'"></td>
+            <td th:text="${o.course.specialisation != null} ? ${o.course.specialisation.code} : 'Common'"></td>
+            <td th:text="${o.course.credits}"></td>
+            <td class="muted" th:text="${o.scheduleInfo}"></td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div class="card mt-1" th:if="${registration.reviewedBy != null}">
+        <h2><i class="fa-solid fa-clipboard-check"></i> Review</h2>
+        <p><span th:text="${registration.status}"></span> by <strong th:text="${registration.reviewedBy.fullName}"></strong>
+            on <span th:text="${#temporals.format(registration.reviewedAt, 'dd MMM yyyy, HH:mm')}"></span></p>
+        <p th:if="${registration.adminRemarks}" th:text="${registration.adminRemarks}"></p>
+    </div>
+
+    <div class="card mt-1" th:if="${registration.status.name() == 'PENDING'}">
+        <h2><i class="fa-solid fa-gavel"></i> Decision</h2>
+        <form method="post" id="decisionForm" th:action="@{/admin/registrations/{id}/approve(id=${registration.id})}">
+            <label for="remarks">Remarks (required when rejecting)</label>
+            <textarea id="remarks" name="remarks" rows="3" maxlength="400" placeholder="e.g. Missing prerequisite for SE3010"></textarea>
+            <div class="mt-1">
+                <button type="submit" class="btn btn-success" th:formaction="@{/admin/registrations/{id}/approve(id=${registration.id})}"><i class="fa-solid fa-check"></i> Approve</button>
+                <button type="submit" class="btn btn-danger" th:formaction="@{/admin/registrations/{id}/reject(id=${registration.id})}"
+                        onclick="return confirmAction('Reject this registration?');"><i class="fa-solid fa-xmark"></i> Reject</button>
+            </div>
+        </form>
+    </div>
+</section>
+</div>
+</body>
+</html>

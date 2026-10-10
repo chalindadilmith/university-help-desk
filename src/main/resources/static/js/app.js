@@ -33,23 +33,112 @@ document.addEventListener('DOMContentLoaded', function () {
     applyTheme(current); // sync the toggle icon with whatever the inline head script already applied
 });
 
+function setNotifOpen(open) {
+    const dropdown = document.getElementById('notifDropdown');
+    const button = document.getElementById('notifButton');
+    if (!dropdown) return;
+    dropdown.classList.toggle('open', open);
+    if (button) button.setAttribute('aria-expanded', open ? 'true' : 'false');
+}
+
 function toggleNotifDropdown() {
-    document.getElementById('notifDropdown').classList.toggle('open');
+    const dropdown = document.getElementById('notifDropdown');
+    if (dropdown) setNotifOpen(!dropdown.classList.contains('open'));
+}
+
+function toggleSidebar(button) {
+    const sidebar = document.getElementById('sidebar');
+    if (!sidebar) return;
+    const open = sidebar.classList.toggle('open');
+    if (button) button.setAttribute('aria-expanded', open ? 'true' : 'false');
 }
 
 // Close the notification dropdown when clicking anywhere else on the page.
 document.addEventListener('click', function (event) {
     const wrapper = document.querySelector('.notif-wrapper');
-    const dropdown = document.getElementById('notifDropdown');
-    if (wrapper && dropdown && !wrapper.contains(event.target)) {
-        dropdown.classList.remove('open');
+    if (wrapper && !wrapper.contains(event.target)) {
+        setNotifOpen(false);
     }
 });
 
-// Generic "are you sure?" confirmation for destructive actions.
-// Usage: <button onclick="return confirmAction('Deactivate this user?')">
+// Keyboard: Escape closes the notification dropdown (returning focus to its button) or an open dialog.
+document.addEventListener('keydown', function (event) {
+    if (event.key !== 'Escape') return;
+    const dropdown = document.getElementById('notifDropdown');
+    if (dropdown && dropdown.classList.contains('open')) {
+        setNotifOpen(false);
+        const button = document.getElementById('notifButton');
+        if (button) button.focus();
+    }
+});
+
+// ---------- Confirmation dialog ----------
+// Usage (unchanged): <button onclick="return confirmAction('Deactivate this user?')">
+// Shows an accessible in-page dialog instead of the browser's confirm(). The first click opens the
+// dialog and cancels the click; choosing "Confirm" repeats the click with a one-time approval flag.
 function confirmAction(message) {
-    return window.confirm(message);
+    const trigger = (window.event && window.event.currentTarget) || document.activeElement;
+    if (!trigger || trigger.dataset.confirmed === '1') {
+        if (trigger) delete trigger.dataset.confirmed;
+        return true;
+    }
+    openConfirmDialog(message, function () {
+        if (trigger.form && typeof trigger.form.requestSubmit === 'function') {
+            trigger.form.requestSubmit(trigger); // does not fire the click handler again
+        } else {
+            trigger.dataset.confirmed = '1';
+            trigger.click();
+        }
+    });
+    return false;
+}
+
+function openConfirmDialog(message, onConfirm) {
+    const previouslyFocused = document.activeElement;
+    const overlay = document.createElement('div');
+    overlay.className = 'confirm-overlay';
+    const box = document.createElement('div');
+    box.className = 'confirm-box';
+    box.setAttribute('role', 'alertdialog');
+    box.setAttribute('aria-modal', 'true');
+    box.setAttribute('aria-labelledby', 'confirmMessage');
+    const text = document.createElement('p');
+    text.id = 'confirmMessage';
+    text.textContent = message;
+    const actions = document.createElement('div');
+    actions.className = 'confirm-actions';
+    const cancel = document.createElement('button');
+    cancel.type = 'button';
+    cancel.className = 'btn btn-outline';
+    cancel.textContent = 'Cancel';
+    const ok = document.createElement('button');
+    ok.type = 'button';
+    ok.className = 'btn';
+    ok.textContent = 'Confirm';
+    actions.appendChild(cancel);
+    actions.appendChild(ok);
+    box.appendChild(text);
+    box.appendChild(actions);
+    overlay.appendChild(box);
+    document.body.appendChild(overlay);
+
+    function close() {
+        document.removeEventListener('keydown', onKey, true);
+        overlay.remove();
+        if (previouslyFocused && previouslyFocused.focus) previouslyFocused.focus();
+    }
+    function onKey(e) {
+        if (e.key === 'Escape') { e.preventDefault(); close(); }
+        if (e.key === 'Tab') { // keep focus inside the dialog
+            e.preventDefault();
+            (document.activeElement === ok ? cancel : ok).focus();
+        }
+    }
+    cancel.addEventListener('click', close);
+    ok.addEventListener('click', function () { close(); onConfirm(); });
+    overlay.addEventListener('click', function (e) { if (e.target === overlay) close(); });
+    document.addEventListener('keydown', onKey, true);
+    cancel.focus();
 }
 
 // ---------- Chatbot widget (Knowledge Base page) ----------
@@ -92,6 +181,30 @@ function sendChatbotMessage() {
     });
 }
 
+function askSuggestion(btn) {
+    const input = document.getElementById('chatbotInput');
+    if (!input) return;
+    input.value = btn.textContent.trim();
+    sendChatbotMessage();
+}
+
+function clearChatbot() {
+    const headers = {};
+    const csrfToken = document.querySelector('meta[name="_csrf"]');
+    const csrfHeader = document.querySelector('meta[name="_csrf_header"]');
+    if (csrfToken && csrfHeader && csrfHeader.content) {
+        headers[csrfHeader.content] = csrfToken.content;
+    }
+    fetch('/student/kb/chatbot/clear', { method: 'POST', headers: headers })
+        .then(function () {
+            const container = document.getElementById('chatbotMessages');
+            if (!container) return;
+            while (container.children.length > 1) {
+                container.removeChild(container.lastChild);
+            }
+        });
+}
+
 function appendChatMessage(text, sender) {
     const container = document.getElementById('chatbotMessages');
     if (!container) return;
@@ -107,7 +220,7 @@ function appendChatOfferTicket() {
     if (!container) return;
     const div = document.createElement('div');
     div.className = 'chatbot-msg bot';
-    div.innerHTML = 'Still stuck? <a href="/student/tickets?create=1">Create a support ticket</a> and a staff member will help.';
+    div.innerHTML = 'Still stuck? <a href="/student/tickets#subject">Create a support ticket</a> and a staff member will help.';
     container.appendChild(div);
     container.scrollTop = container.scrollHeight;
 }
@@ -132,6 +245,8 @@ function removeTypingIndicator(el) {
 }
 
 document.addEventListener('DOMContentLoaded', function () {
+    const chatBox = document.getElementById('chatbotMessages');
+    if (chatBox) chatBox.scrollTop = chatBox.scrollHeight;
     const chatInput = document.getElementById('chatbotInput');
     if (chatInput) {
         chatInput.addEventListener('keydown', function (e) {
@@ -172,12 +287,15 @@ const prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-re
         bar.style.width = '75%';
     }
 
+    window.addEventListener('pageshow', function () { bar.style.opacity = '0'; });
+
     document.addEventListener('click', function (e) {
         const a = e.target.closest && e.target.closest('a[href]');
         if (!a) return;
         const href = a.getAttribute('href') || '';
         if (href.indexOf('#') === 0 || href.indexOf('javascript:') === 0) return;
         if (a.hasAttribute('target') || a.hasAttribute('download')) return;
+        if (href.indexOf('/export') !== -1 || /\.(csv|pdf)(\?|$)/i.test(href) || /\/(attachments|proof|image)(\/|$)/.test(href)) return;
         if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return;
         start();
     });
@@ -277,5 +395,16 @@ document.addEventListener('DOMContentLoaded', function () {
         ripple.addEventListener('animationend', function () { ripple.remove(); });
         // safety net in case animationend doesn't fire (e.g. element removed by navigation)
         setTimeout(function () { if (ripple.parentNode) ripple.remove(); }, 800);
+    });
+});
+
+// ---------- Wide tables scroll sideways on small screens instead of breaking the page ----------
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('main table').forEach(function (table) {
+        if (table.closest('.table-wrap')) return;
+        const wrap = document.createElement('div');
+        wrap.className = 'table-wrap';
+        table.parentNode.insertBefore(wrap, table);
+        wrap.appendChild(table);
     });
 });

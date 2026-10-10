@@ -22,4 +22,9 @@ public class TicketForm {
     @NotBlank(message = "Description is required")
     @Size(max = 2000, message = "Description must be under 2000 characters")
     private String description;
+
+    private com.helpdesk.entity.Priority priority = com.helpdesk.entity.Priority.MEDIUM;
+
+    /** Optional files (screenshots, PDFs) - checked by TicketAttachmentService. */
+    private org.springframework.web.multipart.MultipartFile[] attachments;
 }

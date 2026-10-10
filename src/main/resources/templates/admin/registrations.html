@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:replace="~{fragments/layout :: layout('Registration Approvals', 'registrations', ~{::section})}">
+<section>
+    <h1><i class="fa-solid fa-user-check"></i> Registration Approvals</h1>
+    <div class="alert alert-success" th:if="${success}"><i class="fa-solid fa-circle-check"></i><span th:text="${success}"></span></div>
+    <div class="alert alert-error" th:if="${error}"><i class="fa-solid fa-circle-exclamation"></i><span th:text="${error}"></span></div>
+    <p class="muted"><strong th:text="${pendingCount}"></strong> registration(s) waiting for approval.</p>
+
+    <div class="card">
+        <form method="get" th:action="@{/admin/registrations}" class="form-row" style="align-items:flex-end;">
+            <div>
+                <label for="status">Status</label>
+                <select id="status" name="status">
+                    <option value="ALL" th:selected="${selectedStatus == 'ALL'}">All</option>
+                    <option th:each="st : ${statuses}" th:value="${st}" th:text="${st}" th:selected="${selectedStatus == st.name()}"></option>
+                </select>
+            </div>
+            <div>
+                <label for="semesterId">Semester</label>
+                <select id="semesterId" name="semesterId">
+                    <option value="">All semesters</option>
+                    <option th:each="s : ${semesters}" th:value="${s.id}" th:text="${s.name}" th:selected="${s.id == selectedSemesterId}"></option>
+                </select>
+            </div>
+            <div><button type="submit" class="btn"><i class="fa-solid fa-filter"></i> Filter</button></div>
+        </form>
+    </div>
+
+    <div class="empty-state mt-1" th:if="${#lists.isEmpty(registrations)}"><i class="fa-regular fa-folder-open"></i>No registrations match this filter.</div>
+    <table class="mt-1" th:unless="${#lists.isEmpty(registrations)}">
+        <thead><tr><th>Reg. No.</th><th>Student ID</th><th>Name</th><th>Semester</th><th>Specialisation</th><th>Year / Sem</th><th>Credits</th><th>Submitted</th><th>Status</th><th></th></tr></thead>
+        <tbody>
+        <tr th:each="r : ${registrations}">
+            <td th:text="${r.referenceNo}"></td>
+            <td th:text="${r.student.studentCode}"></td>
+            <td th:text="${r.student.fullName}"></td>
+            <td th:text="${r.semester.name}"></td>
+            <td th:text="${r.specialisation != null} ? ${r.specialisation.code} : '-'"></td>
+            <td th:text="${r.academicYear != null} ? 'Y' + ${r.academicYear} + ' S' + ${r.semesterOfStudy} : '-'"></td>
+            <td th:text="${r.totalCredits}"></td>
+            <td th:text="${#temporals.format(r.createdAt, 'dd MMM yyyy')}"></td>
+            <td><span class="badge" th:classappend="'badge-' + ${r.status.name().toLowerCase()}" th:text="${r.status}"></span></td>
+            <td><a class="btn btn-sm" th:href="@{/admin/registrations/{id}(id=${r.id})}"><i class="fa-solid fa-eye"></i> Review</a></td>
+        </tr>
+        </tbody>
+    </table>
+</section>
+</div>
+</body>
+</html>

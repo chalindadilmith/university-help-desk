@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:replace="~{fragments/layout :: layout('Member Report', 'user-reports', ~{::section})}">
+<section>
+    <a th:href="@{/reports/users}" class="back-link"><i class="fa-solid fa-arrow-left"></i> Back to Users &amp; Reports</a>
+    <div class="report-head mt-1">
+        <div>
+            <h1><i class="fa-solid fa-id-card"></i> <span th:text="${r.user().fullName}"></span>
+                <span th:class="${online} ? 'dot-online' : 'dot-idle'" th:title="${online} ? 'Logged in now' : 'Offline'"></span></h1>
+            <p class="muted" th:text="${r.user().role} + ' &middot; generated ' + ${#temporals.format(r.generatedAt(), 'dd MMM yyyy, HH:mm')}"></p>
+        </div>
+        <div class="actions no-print">
+            <button type="button" class="btn" onclick="window.print()"><i class="fa-solid fa-print"></i> Print / Save PDF</button>
+            <a th:href="@{/reports/users/{id}/export.csv(id=${r.user().id})}" class="btn btn-outline"><i class="fa-solid fa-file-csv"></i> Download CSV</a>
+        </div>
+    </div>
+
+    <div class="card report-section">
+        <h2>Profile</h2>
+        <dl class="kv">
+            <dt>Full name</dt><dd th:text="${r.user().fullName}"></dd>
+            <dt>Role</dt><dd th:text="${r.user().role}"></dd>
+            <dt>Status</dt><dd th:text="${r.user().status}"></dd>
+            <dt>University / staff ID</dt><dd th:text="${r.user().universityId}"></dd>
+            <dt th:if="${r.user().studentCode != null}">Student ID</dt><dd th:if="${r.user().studentCode != null}" th:text="${r.user().studentCode}"></dd>
+            <dt>Email</dt><dd th:text="${r.user().email}"></dd>
+            <dt>Work pools</dt><dd th:text="${#lists.isEmpty(r.pools())} ? '-' : ${#strings.listJoin(r.pools(), ', ')}"></dd>
+            <dt>Account created</dt><dd th:text="${#temporals.format(r.user().createdAt, 'dd MMM yyyy, HH:mm')}"></dd>
+            <dt>Last login</dt><dd th:text="${r.user().lastLoginAt != null} ? ${#temporals.format(r.user().lastLoginAt, 'dd MMM yyyy, HH:mm')} : 'Never'"></dd>
+            <dt>Logged in now</dt><dd th:text="${online} ? 'Yes' : 'No'"></dd>
+            <dt>Must change password</dt><dd th:text="${r.user().mustChangePassword} ? 'Yes' : 'No'"></dd>
+        </dl>
+    </div>
+
+    <div class="card report-section">
+        <h2 th:text="${r.isStudent()} ? 'Tickets raised' : 'Tickets assigned'"></h2>
+        <p class="count-line"><strong th:text="${#lists.size(r.tickets())}">0</strong> in total
+            <span th:if="${r.averageResolutionHours() > 0}" th:text="'&middot; average resolution ' + ${#numbers.formatDecimal(r.averageResolutionHours(), 1, 1)} + ' h'"></span></p>
+        <div class="chip-row">
+            <span class="chip" th:each="e : ${r.ticketsByStatus()}"><span th:text="${#strings.capitalize(#strings.toLowerCase(#strings.replace(e.key, '_', ' ')))}"></span> <span class="chip-count" th:text="${e.value}"></span></span>
+        </div>
+        <div class="empty-state" th:if="${#lists.isEmpty(r.tickets())}">No tickets.</div>
+        <div class="table-wrap" th:unless="${#lists.isEmpty(r.tickets())}">
+            <table>
+                <thead><tr><th>Ref</th><th>Subject</th><th>Category</th><th>Priority</th><th>Status</th><th th:text="${r.isStudent()} ? 'Assigned to' : 'Student'"></th><th>Created</th><th>Resolved</th></tr></thead>
+                <tbody>
+                <tr th:each="t : ${r.tickets()}">
+                    <td th:text="${t.ticketRef}"></td>
+                    <td><span th:text="${t.subject}"></span><div class="ticket-desc" th:text="${t.description}"></div></td>
+                    <td th:text="${t.category.name}"></td>
+                    <td th:text="${t.priority}"></td>
+                    <td th:text="${t.status}"></td>
+                    <td th:if="${r.isStudent()}" th:text="${t.assignedStaff != null} ? ${t.assignedStaff.fullName} : 'Unassigned'"></td>
+                    <td th:unless="${r.isStudent()}" th:text="${t.student.fullName}"></td>
+                    <td th:text="${#temporals.format(t.createdAt, 'dd MMM yyyy')}"></td>
+                    <td th:text="${t.resolvedAt != null} ? ${#temporals.format(t.resolvedAt, 'dd MMM yyyy')} : '-'"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card report-section">
+        <h2 th:text="${r.isStudent()} ? 'Feedback given' : 'Feedback received'"></h2>
+        <p class="count-line" th:unless="${r.isStudent()}">Average rating: <strong th:text="${r.averageRatingReceived() > 0} ? ${#numbers.formatDecimal(r.averageRatingReceived(), 1, 2)} + ' / 5' : 'no ratings yet'"></strong></p>
+        <div th:with="items=${r.isStudent() ? r.feedbackGiven() : r.feedbackReceived()}">
+            <div class="empty-state" th:if="${#lists.isEmpty(items)}">No feedback.</div>
+            <table th:unless="${#lists.isEmpty(items)}">
+                <thead><tr><th>Ticket</th><th>Rating</th><th>Comment</th><th>Date</th></tr></thead>
+                <tbody><tr th:each="f : ${items}">
+                    <td th:text="${f.ticket.ticketRef}"></td><td th:text="${f.rating} + ' / 5'"></td>
+                    <td th:text="${f.comment}"></td><td th:text="${#temporals.format(f.createdAt, 'dd MMM yyyy')}"></td>
+                </tr></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card report-section">
+        <h2>Lost &amp; Found reports</h2>
+        <div class="empty-state" th:if="${#lists.isEmpty(r.lostFoundItems())}">None.</div>
+        <table th:unless="${#lists.isEmpty(r.lostFoundItems())}">
+            <thead><tr><th>Type</th><th>Description</th><th>Location</th><th>Item date</th><th>Status</th></tr></thead>
+            <tbody><tr th:each="i : ${r.lostFoundItems()}">
+                <td th:text="${i.itemType}"></td><td th:text="${i.description}"></td><td th:text="${i.location}"></td>
+                <td th:text="${i.itemDate}"></td><td th:text="${i.status}"></td>
+            </tr></tbody>
+        </table>
+        <h3>Claims</h3>
+        <div class="empty-state" th:if="${#lists.isEmpty(r.claims())}">None.</div>
+        <table th:unless="${#lists.isEmpty(r.claims())}">
+            <thead><tr><th>Item</th><th>Status</th><th>Proof</th><th>Submitted</th></tr></thead>
+            <tbody><tr th:each="c : ${r.claims()}">
+                <td th:text="${c.item.description}"></td><td th:text="${c.status}"></td>
+                <td th:text="${c.proofDescription}"></td><td th:text="${#temporals.format(c.createdAt, 'dd MMM yyyy')}"></td>
+            </tr></tbody>
+        </table>
+    </div>
+
+    <div class="card report-section" th:if="${r.isStudent()}">
+        <h2>Registrations</h2>
+        <div class="empty-state" th:if="${#lists.isEmpty(r.registrations())}">None.</div>
+        <table th:unless="${#lists.isEmpty(r.registrations())}">
+            <thead><tr><th>Reference</th><th>Semester</th><th>Specialisation</th><th>Year / Sem</th><th>Credits</th><th>Status</th><th>Submitted</th></tr></thead>
+            <tbody><tr th:each="g : ${r.registrations()}">
+                <td th:text="${g.referenceNo}"></td><td th:text="${g.semester.name}"></td><td th:text="${g.specialisation.name}"></td>
+                <td th:text="${g.academicYear} + ' / ' + ${g.semesterOfStudy}"></td><td th:text="${g.totalCredits}"></td>
+                <td th:text="${g.status}"></td><td th:text="${#temporals.format(g.createdAt, 'dd MMM yyyy')}"></td>
+            </tr></tbody>
+        </table>
+    </div>
+
+    <div class="card report-section">
+        <h2>Recent activity</h2>
+        <div class="empty-state" th:if="${#lists.isEmpty(r.recentActivity())}">No recorded activity.</div>
+        <table th:unless="${#lists.isEmpty(r.recentActivity())}">
+            <thead><tr><th>When</th><th>Action</th><th>Target</th><th>Details</th></tr></thead>
+            <tbody><tr th:each="a : ${r.recentActivity()}">
+                <td th:text="${#temporals.format(a.createdAt, 'dd MMM yyyy, HH:mm')}"></td><td th:text="${a.action}"></td>
+                <td th:text="${a.targetEntity} + (${a.targetId} != null ? ' #' + ${a.targetId} : '')"></td><td th:text="${a.details}"></td>
+            </tr></tbody>
+        </table>
+    </div>
+</section>
+</div>
+</body>
+</html>

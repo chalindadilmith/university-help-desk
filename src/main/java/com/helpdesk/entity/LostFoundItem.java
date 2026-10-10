@@ -59,6 +59,13 @@ public class LostFoundItem {
     @Builder.Default
     private ItemStatus status = ItemStatus.ACTIVE;
 
+    /** Photo of the item uploaded by the reporter - only the reporter and admins can see it (used for claim verification). */
+    @Column(name = "image_file_name", length = 255)
+    private String imageFileName;
+
+    @Column(name = "image_file_path", length = 500)
+    private String imageFilePath;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 

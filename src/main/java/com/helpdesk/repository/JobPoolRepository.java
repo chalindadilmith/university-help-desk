@@ -7,5 +7,7 @@ import java.util.List;
 
 public interface JobPoolRepository extends JpaRepository<JobPool, Long> {
     List<JobPool> findAllByOrderByNameAsc();
+    List<JobPool> findByStaffMembersId(Long userId);
+
     boolean existsByNameIgnoreCase(String name);
 }

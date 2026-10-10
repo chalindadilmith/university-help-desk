@@ -6,32 +6,54 @@
     <h1><i class="fa-solid fa-gauge-high"></i> Welcome back, <span sec:authentication="name">Staff</span></h1>
 
     <div class="card-grid">
-        <div class="card stat-card">
+        <a class="card stat-card" th:href="@{/staff/tickets/all}">
+            <span class="stat-icon"><i class="fa-solid fa-ticket"></i></span>
+            <div class="stat-body">
+                <div class="stat-value" th:text="${totalTickets}"></div>
+                <div class="stat-label">Tickets in the System</div>
+            </div>
+            <i class="fa-solid fa-chevron-right stat-hint"></i>
+        </a>
+        <a class="card stat-card" th:href="@{/staff/tickets}">
             <span class="stat-icon"><i class="fa-solid fa-inbox"></i></span>
             <div class="stat-body">
                 <div class="stat-value" th:text="${queueSize}"></div>
                 <div class="stat-label">In Your Queue</div>
             </div>
-        </div>
-        <div class="card stat-card">
+            <i class="fa-solid fa-chevron-right stat-hint"></i>
+        </a>
+        <a class="card stat-card" th:href="@{/staff/tickets(scope='unassigned')}">
             <span class="stat-icon"><i class="fa-solid fa-triangle-exclamation"></i></span>
             <div class="stat-body">
                 <div class="stat-value" th:text="${unassignedCount}"></div>
                 <div class="stat-label">Unassigned</div>
             </div>
-        </div>
-        <div class="card stat-card">
+            <i class="fa-solid fa-chevron-right stat-hint"></i>
+        </a>
+        <a class="card stat-card" th:href="@{/staff/tickets(scope='active')}">
             <span class="stat-icon"><i class="fa-solid fa-user-check"></i></span>
             <div class="stat-body">
                 <div class="stat-value" th:text="${myTicketCount}"></div>
                 <div class="stat-label">Assigned to Me</div>
             </div>
-        </div>
+            <i class="fa-solid fa-chevron-right stat-hint"></i>
+        </a>
+    </div>
+
+    <p class="count-line"><strong th:text="${totalTickets}">0</strong> tickets in total, by status:</p>
+    <div class="chip-row">
+        <a class="chip" th:each="e : ${statusCounts}" th:href="@{/staff/tickets/all(status=${e.key})}">
+            <span th:text="${#strings.capitalize(#strings.toLowerCase(#strings.replace(e.key, '_', ' ')))}"></span>
+            <span class="chip-count" th:text="${e.value}"></span>
+        </a>
     </div>
 
     <div class="section-title"><h2><i class="fa-solid fa-bolt"></i> Quick Actions</h2></div>
     <div class="card-grid">
-        <a class="card" th:href="@{/staff/tickets}"><span class="card-icon"><i class="fa-solid fa-ticket"></i></span> View Ticket Queue</a>
+        <a class="card" th:href="@{/staff/tickets}"><span class="card-icon"><i class="fa-solid fa-inbox"></i></span> My Ticket Queue</a>
+        <a class="card" th:href="@{/staff/tickets/all}"><span class="card-icon"><i class="fa-solid fa-ticket"></i></span> All Tickets</a>
+        <a class="card" th:href="@{/staff/tickets/new}"><span class="card-icon"><i class="fa-solid fa-plus"></i></span> New Ticket for a Student</a>
+        <a class="card" th:href="@{/reports/users}"><span class="card-icon"><i class="fa-solid fa-users-viewfinder"></i></span> Users, Online &amp; Member Reports</a>
         <a class="card" th:href="@{/staff/kb}"><span class="card-icon"><i class="fa-solid fa-book-open-reader"></i></span> Manage FAQ Articles</a>
         <a class="card" th:href="@{/reports}"><span class="card-icon"><i class="fa-solid fa-chart-line"></i></span> View Reports</a>
     </div>

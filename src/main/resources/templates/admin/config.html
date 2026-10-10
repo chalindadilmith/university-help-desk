@@ -4,7 +4,8 @@
 <div th:replace="~{fragments/layout :: layout('Ticket Routing Config', 'config', ~{::section})}">
 <section>
     <h1><i class="fa-solid fa-route"></i> Ticket Routing Configuration</h1>
-    <p class="muted">Categories are grouped into staff work-pools; routing rules decide which pool a new ticket lands in based on category + priority.</p>
+    <p class="muted">Each category and routing rule is pointed at an existing staff work pool; routing rules decide which pool a new ticket lands in based on category + priority.</p>
+    <div class="alert alert-success" th:if="${success}"><i class="fa-solid fa-circle-check"></i><span th:text="${success}"></span></div>
     <div class="alert alert-error" th:if="${error}"><i class="fa-solid fa-circle-exclamation"></i><span th:text="${error}"></span></div>
 
     <div class="card-grid" style="grid-template-columns: 1fr 1fr;">
@@ -13,7 +14,7 @@
             <form th:action="@{/admin/config/categories}" th:object="${categoryForm}" method="post">
                 <label for="catName">Name</label>
                 <input type="text" id="catName" th:field="*{name}" placeholder="e.g. IT"/>
-                <label for="catPool">Assign to Pool (optional)</label>
+                <label for="catPool">Route to existing pool (optional)</label>
                 <select id="catPool" th:field="*{poolId}">
                     <option value="">-- none yet --</option>
                     <option th:each="p : ${pools}" th:value="${p.id}" th:text="${p.name}"></option>
@@ -21,39 +22,37 @@
                 <button type="submit" class="btn btn-sm"><i class="fa-solid fa-plus"></i> Add Category</button>
             </form>
             <table class="mt-1">
-                <thead><tr><th>Name</th><th>Pool</th></tr></thead>
+                <thead><tr><th>Name</th><th>Routed to pool</th></tr></thead>
                 <tbody>
                 <tr th:each="c : ${categories}">
                     <td th:text="${c.name}"></td>
-                    <td th:text="${c.pool != null ? c.pool.name : '-'}"></td>
+                    <td>
+                        <form th:action="@{/admin/config/categories/{id}/pool(id=${c.id})}" method="post" class="form-row" style="margin:0;">
+                            <select name="poolId">
+                                <option value="">-- none --</option>
+                                <option th:each="p : ${pools}" th:value="${p.id}" th:text="${p.name}" th:selected="${c.pool != null and c.pool.id == p.id}"></option>
+                            </select>
+                            <button type="submit" class="btn btn-sm"><i class="fa-solid fa-floppy-disk"></i> Update</button>
+                        </form>
+                    </td>
                 </tr>
                 </tbody>
             </table>
         </div>
 
         <div class="card">
-            <h2><i class="fa-solid fa-people-group"></i> Staff Work-Pools</h2>
-            <form th:action="@{/admin/config/pools}" th:object="${poolForm}" method="post">
-                <label for="poolName">Name</label>
-                <input type="text" id="poolName" th:field="*{name}" placeholder="e.g. IT Support Team"/>
-                <button type="submit" class="btn btn-sm"><i class="fa-solid fa-plus"></i> Add Pool</button>
-            </form>
-            <div th:each="p : ${pools}" class="mt-1" style="border-top:1px solid var(--border-color); padding-top:0.6rem;">
-                <strong th:text="${p.name}"></strong>
-                <div class="muted" th:if="${#lists.isEmpty(p.staffMembers)}"><i class="fa-regular fa-circle-question"></i> No staff assigned yet.</div>
-                <div th:each="s : ${p.staffMembers}" class="flex-between">
-                    <span th:text="${s.fullName}"></span>
-                    <form th:action="@{/admin/config/pools/{poolId}/staff/{staffId}/remove(poolId=${p.id},staffId=${s.id})}" method="post">
-                        <button type="submit" class="btn btn-sm btn-danger"><i class="fa-solid fa-xmark"></i> Remove</button>
-                    </form>
-                </div>
-                <form th:action="@{/admin/config/pools/{poolId}/staff(poolId=${p.id})}" method="post" class="form-row mt-1">
-                    <select name="staffUserId">
-                        <option th:each="s : ${staff}" th:value="${s.id}" th:text="${s.fullName}"></option>
-                    </select>
-                    <button type="submit" class="btn btn-sm btn-secondary"><i class="fa-solid fa-user-plus"></i> Assign</button>
-                </form>
-            </div>
+            <h2><i class="fa-solid fa-people-group"></i> Staff Work Pools</h2>
+            <p class="muted">Routing can only use the staff work pools that already exist. Create pools and add staff to them on the Work Pools page.</p>
+            <a th:href="@{/admin/pools}" class="btn btn-sm"><i class="fa-solid fa-people-group"></i> Manage Work Pools</a>
+            <table class="mt-1">
+                <thead><tr><th>Pool</th><th>Members</th></tr></thead>
+                <tbody>
+                <tr th:each="p : ${pools}">
+                    <td th:text="${p.name}"></td>
+                    <td th:text="${#sets.size(p.staffMembers)}"></td>
+                </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 
@@ -87,7 +86,14 @@
             <tr th:each="r : ${rules}">
                 <td th:text="${r.category.name}"></td>
                 <td th:text="${r.priority}"></td>
-                <td th:text="${r.targetPool.name}"></td>
+                <td>
+                    <form th:action="@{/admin/config/routing-rules/{id}/pool(id=${r.id})}" method="post" class="form-row" style="margin:0;">
+                        <select name="poolId">
+                            <option th:each="p : ${pools}" th:value="${p.id}" th:text="${p.name}" th:selected="${r.targetPool.id == p.id}"></option>
+                        </select>
+                        <button type="submit" class="btn btn-sm"><i class="fa-solid fa-floppy-disk"></i> Update</button>
+                    </form>
+                </td>
                 <td>
                     <form th:action="@{/admin/config/routing-rules/{id}/delete(id=${r.id})}" method="post">
                         <button type="submit" class="btn btn-sm btn-danger" onclick="return confirmAction('Delete this rule?')"><i class="fa-solid fa-trash"></i> Delete</button>

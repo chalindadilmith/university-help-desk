@@ -46,6 +46,17 @@ public class User {
     @Column(name = "university_id", nullable = false, unique = true, length = 30)
     private String universityId;
 
+    /**
+     * System-generated unique student ID (e.g. STU202600012), assigned
+     * automatically when a student account is created. Null for Staff/Admin.
+     * Uniqueness is enforced by a filtered unique index (ux_users_student_code,
+     * see RegistrationSchemaInitializer) because SQL Server's plain UNIQUE
+     * constraint would allow only one NULL.
+     */
+    @Size(max = 20)
+    @Column(name = "student_code", length = 20)
+    private String studentCode;
+
     @NotBlank
     @Email
     @Size(max = 150)
@@ -65,6 +76,19 @@ public class User {
     @Column(name = "status", nullable = false, length = 20)
     @Builder.Default
     private AccountStatus status = AccountStatus.ACTIVE;
+
+    /**
+     * True while the account still uses a temporary password (staff created by an
+     * admin, or any account whose password an admin reset). The user is forced to
+     * change it before using anything else (see ForcePasswordChangeInterceptor).
+     */
+    @Column(name = "must_change_password", nullable = false, columnDefinition = "bit default 0")
+    @Builder.Default
+    private boolean mustChangePassword = false;
+
+    /** When the user last signed in (null until the first login after this field was added). */
+    @Column(name = "last_login_at")
+    private LocalDateTime lastLoginAt;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

@@ -24,7 +24,7 @@ public class StudentDashboardController {
     @GetMapping("/dashboard")
     public String dashboard(@AuthenticationPrincipal CustomUserDetails principal, Model model) {
         var tickets = ticketService.myTickets(principal.getUser().getId());
-        long openCount = tickets.stream().filter(t -> t.getStatus().name().equals("OPEN") || t.getStatus().name().equals("IN_PROGRESS")).count();
+        long openCount = tickets.stream().filter(t -> t.getStatus() != com.helpdesk.entity.TicketStatus.RESOLVED && t.getStatus() != com.helpdesk.entity.TicketStatus.CLOSED).count();
 
         model.addAttribute("totalTickets", tickets.size());
         model.addAttribute("openTickets", openCount);

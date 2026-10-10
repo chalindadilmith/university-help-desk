@@ -4,17 +4,30 @@
 <div th:replace="~{fragments/layout :: layout('My Tickets', 'tickets', ~{::section})}">
 <section>
     <h1><i class="fa-solid fa-ticket"></i> My Tickets</h1>
+    <div class="alert alert-success" th:if="${success}"><i class="fa-solid fa-circle-check"></i><span th:text="${success}"></span></div>
+    <div class="alert alert-error" th:if="${error}"><i class="fa-solid fa-circle-exclamation"></i><span th:text="${error}"></span></div>
 
     <div class="card">
         <h2><i class="fa-solid fa-circle-plus"></i> Create a New Ticket</h2>
         <div class="empty-state" th:if="${#lists.isEmpty(categories)}">
             <i class="fa-regular fa-circle-question"></i>No ticket categories have been configured yet. Ask an Admin to set one up under Ticket Routing Config.
         </div>
-        <form th:unless="${#lists.isEmpty(categories)}" th:action="@{/student/tickets}" th:object="${ticketForm}" method="post">
-            <label for="categoryId">Category</label>
-            <select id="categoryId" th:field="*{categoryId}">
-                <option th:each="c : ${categories}" th:value="${c.id}" th:text="${c.name}"></option>
-            </select>
+        <form th:unless="${#lists.isEmpty(categories)}" th:action="@{/student/tickets}" th:object="${ticketForm}" method="post" enctype="multipart/form-data">
+            <div class="form-row">
+                <div>
+                    <label for="categoryId">Category</label>
+                    <select id="categoryId" th:field="*{categoryId}">
+                        <option th:each="c : ${categories}" th:value="${c.id}" th:text="${c.name}"></option>
+                    </select>
+                </div>
+                <div>
+                    <label for="priority">How urgent is it?</label>
+                    <select id="priority" th:field="*{priority}">
+                        <option th:each="p : ${priorities}" th:value="${p.name()}"
+                                th:text="${#strings.capitalize(#strings.toLowerCase(p.name()))}"></option>
+                    </select>
+                </div>
+            </div>
 
             <label for="subject">Subject</label>
             <input type="text" id="subject" th:field="*{subject}"/>
@@ -24,25 +37,81 @@
             <textarea id="description" th:field="*{description}"></textarea>
             <span class="field-error" th:if="${#fields.hasErrors('description')}"><i class="fa-solid fa-circle-exclamation"></i> <span th:errors="*{description}"></span></span>
 
-            <button type="submit" class="btn"><i class="fa-solid fa-paper-plane"></i> Submit Ticket</button>
+            <label for="attachments">Attachments (optional)</label>
+            <input type="file" id="attachments" name="attachments" multiple="multiple" accept=".png,.jpg,.jpeg,.pdf"/>
+            <span class="muted">Up to 3 files, PNG, JPG or PDF, 5 MB each.</span>
+            <span class="field-error" th:if="${#fields.hasErrors('attachments')}"><i class="fa-solid fa-circle-exclamation"></i> <span th:errors="*{attachments}"></span></span>
+
+            <button type="submit" class="btn mt-1"><i class="fa-solid fa-paper-plane"></i> Submit Ticket</button>
         </form>
     </div>
 
     <div class="section-title"><h2><i class="fa-solid fa-clock-rotate-left"></i> History</h2></div>
-    <div class="empty-state" th:if="${#lists.isEmpty(tickets)}"><i class="fa-regular fa-folder-open"></i>You haven't raised any tickets yet.</div>
-    <table th:unless="${#lists.isEmpty(tickets)}">
-        <thead><tr><th>Ref</th><th>Subject</th><th>Category</th><th>Status</th><th>Created</th><th></th></tr></thead>
+    <p class="count-line">You have <strong th:text="${totalMine}">0</strong> ticket(s) in total.</p>
+    <div class="chip-row">
+        <a class="chip" th:classappend="${scope == null or scope == ''} ? 'active'" th:href="@{/student/tickets}">All <span class="chip-count" th:text="${totalMine}"></span></a>
+        <a class="chip" th:classappend="${scope == 'active'} ? 'active'" th:href="@{/student/tickets(scope='active')}">Still open</a>
+    </div>
+    <form th:action="@{/student/tickets}" method="get" class="card form-row" style="align-items:flex-end;">
+        <input type="hidden" name="scope" th:value="${scope}"/>
+        <div>
+            <label for="q">Search</label>
+            <input type="text" id="q" name="q" th:value="${q}" placeholder="Reference, subject or category"/>
+        </div>
+        <div>
+            <label for="statusFilter">Status</label>
+            <select id="statusFilter" name="status">
+                <option value="">All statuses</option>
+                <option th:each="s : ${statuses}" th:value="${s.name()}" th:text="${s}" th:selected="${s.name() == statusFilter}"></option>
+            </select>
+        </div>
+        <div>
+            <label for="sort">Sort by</label>
+            <select id="sort" name="sort">
+                <option value="" th:selected="${sort == null or sort == ''}">Newest first</option>
+                <option value="oldest" th:selected="${sort == 'oldest'}">Oldest first</option>
+                <option value="priority" th:selected="${sort == 'priority'}">Highest priority</option>
+                <option value="status" th:selected="${sort == 'status'}">Status</option>
+            </select>
+        </div>
+        <div>
+            <button type="submit" class="btn">Apply</button>
+            <a th:href="@{/student/tickets}" class="btn btn-outline">Reset</a>
+        </div>
+    </form>
+    <div class="empty-state" th:if="${#lists.isEmpty(tickets)}"><i class="fa-regular fa-folder-open"></i>
+        <span th:if="${view.totalItems == 0 and (q == null or q.isBlank()) and (statusFilter == null or statusFilter.isBlank())}">You haven't raised any tickets yet.</span>
+        <span th:unless="${view.totalItems == 0 and (q == null or q.isBlank()) and (statusFilter == null or statusFilter.isBlank())}">No tickets match your search.</span>
+    </div>
+    <div class="table-wrap" th:unless="${#lists.isEmpty(tickets)}">
+    <table>
+        <thead><tr><th>Ref</th><th>Subject</th><th>Category</th><th>Priority</th><th>Status</th><th>Created</th><th>Actions</th></tr></thead>
         <tbody>
         <tr th:each="t : ${tickets}">
             <td th:text="${t.ticketRef}"></td>
             <td th:text="${t.subject}"></td>
             <td th:text="${t.category.name}"></td>
+            <td th:text="${#strings.capitalize(#strings.toLowerCase(t.priority.name()))}"></td>
             <td><span class="badge" th:classappend="'badge-' + ${t.status.name().toLowerCase()}" th:text="${t.status}"></span></td>
             <td th:text="${#temporals.format(t.createdAt, 'dd MMM yyyy')}"></td>
-            <td><a th:href="@{/student/tickets/{id}(id=${t.id})}" class="btn btn-sm btn-outline"><i class="fa-regular fa-eye"></i> View</a></td>
+            <td class="actions">
+                <a th:href="@{/student/tickets/{id}(id=${t.id})}" class="btn btn-sm btn-outline"><i class="fa-regular fa-eye"></i> View</a>
+                <a th:if="${t.status.name() != 'RESOLVED' and t.status.name() != 'CLOSED'}" th:href="@{/student/tickets/{id}/edit(id=${t.id})}" class="btn btn-sm btn-outline"><i class="fa-solid fa-pen"></i> Edit</a>
+                <form th:action="@{/student/tickets/{id}/delete(id=${t.id})}" method="post" style="display:inline;">
+                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirmAction('Delete this ticket permanently? This cannot be undone.')"><i class="fa-solid fa-trash"></i> Delete</button>
+                </form>
+            </td>
         </tr>
         </tbody>
     </table>
+    </div>
+    <div class="pager" th:if="${view.totalPages > 1}">
+        <a th:if="${view.hasPrevious}" class="btn btn-sm btn-outline"
+           th:href="@{/student/tickets(q=${q},status=${statusFilter},sort=${sort},scope=${scope},page=${view.page - 1})}">Previous</a>
+        <span class="muted" th:text="'Page ' + ${view.page} + ' of ' + ${view.totalPages}"></span>
+        <a th:if="${view.hasNext}" class="btn btn-sm btn-outline"
+           th:href="@{/student/tickets(q=${q},status=${statusFilter},sort=${sort},scope=${scope},page=${view.page + 1})}">Next</a>
+    </div>
 </section>
 </div>
 </body>

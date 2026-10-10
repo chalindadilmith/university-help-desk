@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+<div th:replace="~{fragments/layout :: layout(${ticket == null ? 'New Ticket' : 'Edit Ticket'}, ${canAssign ? 'admin-tickets' : 'all-tickets'}, ~{::section})}">
+<section>
+    <a th:href="${ticket == null} ? @{${basePath}} : @{${basePath} + '/' + ${ticket.id}}" class="back-link"><i class="fa-solid fa-arrow-left"></i> Back</a>
+    <h1 class="mt-1">
+        <i class="fa-solid" th:classappend="${ticket == null} ? 'fa-plus' : 'fa-pen'"></i>
+        <span th:if="${ticket == null}">Create a Ticket</span>
+        <span th:if="${ticket != null}" th:text="'Edit ' + ${ticket.ticketRef}"></span>
+    </h1>
+
+    <div class="alert alert-error" th:if="${error}"><i class="fa-solid fa-circle-exclamation"></i><span th:text="${error}"></span></div>
+
+    <div class="card">
+        <form th:action="${ticket == null} ? @{${basePath} + '/new'} : @{${basePath} + '/' + ${ticket.id} + '/edit'}" th:object="${ticketForm}" method="post">
+
+            <div th:if="${ticket == null}">
+                <label for="studentId">Student</label>
+                <select id="studentId" th:field="*{studentId}">
+                    <option value="">-- choose the student this ticket is for --</option>
+                    <option th:each="s : ${students}" th:value="${s.id}" th:text="${s.fullName + ' (' + s.email + ')'}"></option>
+                </select>
+                <span class="field-error" th:if="${#fields.hasErrors('studentId')}"><i class="fa-solid fa-circle-exclamation"></i> <span th:errors="*{studentId}"></span></span>
+            </div>
+            <p th:if="${ticket != null}" class="muted"><i class="fa-solid fa-user"></i> Raised by <strong th:text="${ticket.student.fullName}"></strong></p>
+
+            <div class="form-row">
+                <div>
+                    <label for="categoryId">Category</label>
+                    <select id="categoryId" th:field="*{categoryId}">
+                        <option th:each="c : ${categories}" th:value="${c.id}" th:text="${c.name}"></option>
+                    </select>
+                </div>
+                <div>
+                    <label for="priority">Priority</label>
+                    <select id="priority" th:field="*{priority}">
+                        <option th:each="p : ${priorities}" th:value="${p.name()}"
+                                th:text="${#strings.capitalize(#strings.toLowerCase(p.name()))}"></option>
+                    </select>
+                </div>
+                <div th:if="${ticket != null}">
+                    <label for="status">Status</label>
+                    <select id="status" th:field="*{status}">
+                        <option th:each="s : ${statuses}" th:value="${s.name()}"
+                                th:text="${#strings.capitalize(#strings.toLowerCase(#strings.replace(s.name(), '_', ' ')))}"></option>
+                    </select>
+                </div>
+            </div>
+
+            <div th:if="${canAssign}">
+                <label for="assignedStaffId">Assigned to</label>
+                <select id="assignedStaffId" th:field="*{assignedStaffId}">
+                    <option value="">Unassigned (goes to the work pool of its category)</option>
+                    <option th:each="u : ${staffList}" th:value="${u.id}" th:text="${u.fullName + ' (' + u.email + ')'}"></option>
+                </select>
+            </div>
+
+            <label for="subject">Subject</label>
+            <input type="text" id="subject" th:field="*{subject}"/>
+            <span class="field-error" th:if="${#fields.hasErrors('subject')}"><i class="fa-solid fa-circle-exclamation"></i> <span th:errors="*{subject}"></span></span>
+
+            <label for="description">Description</label>
+            <textarea id="description" th:field="*{description}" rows="6"></textarea>
+            <span class="field-error" th:if="${#fields.hasErrors('description')}"><i class="fa-solid fa-circle-exclamation"></i> <span th:errors="*{description}"></span></span>
+
+            <div class="actions mt-1">
+                <button type="submit" class="btn"><i class="fa-solid fa-floppy-disk"></i> <span th:text="${ticket == null} ? 'Create Ticket' : 'Save Changes'"></span></button>
+                <a th:href="${ticket == null} ? @{${basePath}} : @{${basePath} + '/' + ${ticket.id}}" class="btn btn-outline">Cancel</a>
+            </div>
+        </form>
+    </div>
+</section>
+</div>
+</body>
+</html>

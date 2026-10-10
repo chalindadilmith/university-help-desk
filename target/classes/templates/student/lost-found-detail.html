@@ -16,8 +16,72 @@
         <p><i class="fa-regular fa-calendar"></i> <strong>Date:</strong> <span th:text="${#temporals.format(item.itemDate, 'dd MMM yyyy')}"></span></p>
         <p><i class="fa-solid fa-user"></i> <strong>Reported by:</strong> <span th:text="${item.reporter.fullName}"></span></p>
 
-        <form th:if="${item.status.name() == 'ACTIVE'}" th:action="@{/student/lost-found/{id}/claim(id=${item.id})}" method="post" class="mt-1">
-            <button type="submit" class="btn" onclick="return confirmAction('Submit a claim on this item?')"><i class="fa-solid fa-hand"></i> This is mine / I found this</button>
+        <p class="muted" th:if="${ownReport}"><i class="fa-solid fa-circle-info"></i> You reported this item, so you cannot claim it.</p>
+        <div th:if="${ownReport and item.imageFilePath != null}">
+            <p><strong>Your photo</strong> <span class="muted">(only you and admins can see it)</span></p>
+            <img th:src="@{/student/lost-found/{id}/image(id=${item.id})}" alt="Your photo of the item" style="max-width:100%;max-height:260px;border-radius:8px;"/>
+        </div>
+        <p class="muted" th:if="${!ownReport}"><i class="fa-solid fa-lock"></i> The reporter's photo is kept private and used by admins to verify claims.</p>
+
+        <p th:if="${ownReport and item.status.name() == 'ACTIVE'}" class="mt-1">
+            <a th:href="@{/student/lost-found/{id}/edit(id=${item.id})}" class="btn btn-sm btn-outline"><i class="fa-solid fa-pen"></i> Edit my report</a>
+        </p>
+
+        <!-- reporter found the item themselves / it is sorted out: remove the report -->
+        <form th:if="${ownReport}" th:action="@{/student/lost-found/{id}/delete(id=${item.id})}" method="post" class="mt-1">
+            <button type="submit" class="btn btn-sm btn-outline" onclick="return confirmAction('Delete this report? Any claims on it will be closed and the claimants notified. This cannot be undone.')"><i class="fa-solid fa-trash"></i> Delete my report</button>
+            <span class="muted">Found it yourself? Delete the report so nobody else claims it.</span>
+        </form>
+
+        <!-- my claim status -->
+        <div th:if="${myClaim != null}" class="mt-1">
+            <p><i class="fa-solid fa-hand"></i> <strong>Your claim</strong>
+               <span th:text="${myClaim.referenceNo}"></span>
+               <span class="badge" th:classappend="'badge-' + ${myClaim.status.name().toLowerCase()}" th:text="${myClaim.status}"></span></p>
+
+            <p class="muted" th:if="${myClaim.status.name() == 'PENDING'}"><i class="fa-regular fa-clock"></i> Waiting for an admin to compare your photo and description with the reporter's.</p>
+
+            <div class="alert alert-success" th:if="${myClaim.status.name() == 'VERIFIED'}">
+                <i class="fa-solid fa-circle-check"></i>
+                <span>
+                    <strong>Verified!</strong> Collect your item from <strong th:text="${myClaim.collectionLocation}"></strong>
+                    on <strong th:text="${#temporals.format(myClaim.collectionDate, 'dd MMMM yyyy')}"></strong>,
+                    <strong th:text="${myClaim.collectionTime}"></strong>.
+                    Bring your Student ID and reference no. <strong th:text="${myClaim.referenceNo}"></strong>.
+                    <span th:if="${myClaim.collectionNote != null}"><br/>Note: <span th:text="${myClaim.collectionNote}"></span></span>
+                </span>
+            </div>
+
+            <div class="alert alert-error" th:if="${myClaim.status.name() == 'REJECTED'}">
+                <i class="fa-solid fa-circle-exclamation"></i>
+                <span><strong>Claim rejected.</strong> Reason: <span th:text="${myClaim.rejectionReason}"></span></span>
+            </div>
+
+            <div th:if="${myClaim.proofFilePath != null}">
+                <p class="muted">Your evidence photo:</p>
+                <img th:src="@{/student/lost-found/claims/{id}/proof(id=${myClaim.id})}" alt="Your evidence photo" style="max-width:100%;max-height:200px;border-radius:8px;"/>
+            </div>
+
+            <!-- claimant already met the owner / no longer needs it: remove the claim -->
+            <form th:action="@{/student/lost-found/claims/{id}/delete(id=${myClaim.id})}" method="post" class="mt-1">
+                <button type="submit" class="btn btn-sm btn-outline" onclick="return confirmAction('Delete your claim? The reporter will be notified. This cannot be undone.')"><i class="fa-solid fa-trash"></i> Delete my claim</button>
+                <span class="muted">Already met the owner? Delete your claim.</span>
+            </form>
+        </div>
+
+        <!-- new claim, or resubmission after a rejection -->
+        <form th:if="${item.status.name() == 'ACTIVE' and !ownReport and (myClaim == null or myClaim.status.name() == 'REJECTED')}"
+              th:action="@{/student/lost-found/{id}/claim(id=${item.id})}" method="post" enctype="multipart/form-data" class="mt-1">
+            <h3 th:text="${myClaim == null} ? 'Claim this item' : 'Reapply with stronger evidence'"></h3>
+            <p class="muted" th:if="${myClaim == null}">Upload a photo of the item (or of you with it / its receipt) and describe details only the real owner would know. An admin compares it with the reporter's photo.</p>
+            <p class="muted" th:if="${myClaim != null}">Fix what the admin pointed out above: use a clearer photo and add specific identifying details (marks, contents, serial number, when and where you lost it). Your earlier claim is kept for the record.</p>
+            <label for="proofDescription">Describe the item or give proof it is yours</label>
+            <textarea id="proofDescription" name="proofDescription" rows="4" required="required"
+                      th:attr="minlength=(${myClaim == null} ? 10 : 20)" maxlength="1000"
+                      placeholder="e.g. colour, brand, marks, contents, serial number, where/when you lost it"></textarea>
+            <label for="proofFile">Photo evidence (required - PNG or JPG, max 5 MB)</label>
+            <input type="file" id="proofFile" name="proofFile" accept=".png,.jpg,.jpeg" required="required"/>
+            <button type="submit" class="btn"><i class="fa-solid fa-hand"></i> <span th:text="${myClaim == null} ? 'Submit claim' : 'Resubmit claim'"></span></button>
         </form>
     </div>
 </section>

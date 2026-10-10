@@ -25,6 +25,13 @@ public class StaffDashboardController {
         long mine = queue.stream().filter(t -> t.getAssignedStaff() != null
                 && t.getAssignedStaff().getId().equals(principal.getUser().getId())).count();
 
+        var everything = ticketService.allTickets();
+        java.util.Map<String, Long> statusCounts = new java.util.LinkedHashMap<>();
+        for (com.helpdesk.entity.TicketStatus s : com.helpdesk.entity.TicketStatus.values()) {
+            statusCounts.put(s.name(), everything.stream().filter(t -> t.getStatus() == s).count());
+        }
+        model.addAttribute("statusCounts", statusCounts);
+        model.addAttribute("totalTickets", everything.size());
         model.addAttribute("queueSize", queue.size());
         model.addAttribute("unassignedCount", unassigned);
         model.addAttribute("myTicketCount", mine);

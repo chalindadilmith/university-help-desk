@@ -13,9 +13,8 @@ import lombok.Setter;
  * entity (that would let a malicious form field overwrite fields like
  * "role" or "status" - a classic mass-assignment mistake).
  *
- * Password complexity here (min 8 chars) is an OPTIONAL IMPROVEMENT baseline
- * since the source documents left the exact rule undefined (Phase 0, Open
- * Issue). Tighten it later if your team defines a stricter policy.
+ * Password rule: 8-100 characters with at least one letter and one number
+ * (see com.helpdesk.util.PasswordPolicy, shared with change/reset password).
  */
 @Getter
 @Setter
@@ -36,7 +35,8 @@ public class RegisterForm {
     private String email;
 
     @NotBlank(message = "Password is required")
-    @Size(min = 8, max = 100, message = "Password must be at least 8 characters")
+    @jakarta.validation.constraints.Pattern(regexp = com.helpdesk.util.PasswordPolicy.REGEX,
+            message = com.helpdesk.util.PasswordPolicy.MESSAGE)
     private String password;
 
     @NotBlank(message = "Please confirm your password")

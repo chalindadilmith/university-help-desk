@@ -3,43 +3,84 @@
 <body>
 <div th:replace="~{fragments/layout :: layout('Reports', 'reports', ~{::section})}">
 <section>
-    <h1><i class="fa-solid fa-chart-line"></i> Reports</h1>
-    <p class="muted">Computed live from the database - ticket volume, resolution time, and satisfaction (UC-F5-01).</p>
+    <div class="flex-between">
+        <h1><i class="fa-solid fa-chart-line"></i> Reports</h1>
+        <a class="btn btn-outline" th:href="@{/reports/export.csv(from=${from},to=${to},categoryId=${categoryId})}">
+            <i class="fa-solid fa-file-csv"></i> Download CSV
+        </a>
+    </div>
+    <p class="muted">Computed live from the database. Choose a period and category to narrow the figures; tickets are counted by the date they were created.</p>
+
+    <form th:action="@{/reports}" method="get" class="card form-row" style="align-items:flex-end;">
+        <div><label for="from">From</label><input type="date" id="from" name="from" th:value="${from}"/></div>
+        <div><label for="to">To</label><input type="date" id="to" name="to" th:value="${to}"/></div>
+        <div>
+            <label for="categoryId">Category</label>
+            <select id="categoryId" name="categoryId">
+                <option value="">All categories</option>
+                <option th:each="c : ${categories}" th:value="${c.id}" th:text="${c.name}" th:selected="${categoryId != null and categoryId == c.id}"></option>
+            </select>
+        </div>
+        <div><button type="submit" class="btn">Apply</button> <a th:href="@{/reports}" class="btn btn-outline">Reset</a></div>
+    </form>
+    <div class="alert alert-error" th:if="${rangeInvalid}"><i class="fa-solid fa-circle-exclamation"></i><span>The "From" date is after the "To" date, so no tickets can match.</span></div>
 
     <div class="card-grid">
-        <div class="card stat-card">
-            <span class="stat-icon"><i class="fa-solid fa-ticket"></i></span>
-            <div class="stat-body">
-                <div class="stat-value" th:text="${summary.totalTickets}"></div>
-                <div class="stat-label">Total Tickets</div>
-            </div>
+        <div class="card stat-card"><span class="stat-icon"><i class="fa-solid fa-ticket"></i></span>
+            <div class="stat-body"><div class="stat-value" th:text="${report.totalTickets}"></div><div class="stat-label">Tickets</div></div></div>
+        <div class="card stat-card"><span class="stat-icon"><i class="fa-solid fa-stopwatch"></i></span>
+            <div class="stat-body"><div class="stat-value" th:text="${#numbers.formatDecimal(report.averageResolutionHours, 1, 1)} + 'h'"></div><div class="stat-label">Avg. resolution time</div></div></div>
+        <div class="card stat-card"><span class="stat-icon"><i class="fa-solid fa-star"></i></span>
+            <div class="stat-body"><div class="stat-value" th:text="${report.feedbackCount > 0} ? ${#numbers.formatDecimal(report.averageSatisfactionRating, 1, 1)} + '/5' : 'N/A'"></div>
+                <div class="stat-label">Avg. satisfaction (<span th:text="${report.feedbackCount}"></span> ratings)</div></div></div>
+        <div class="card stat-card"><span class="stat-icon"><i class="fa-solid fa-user-clock"></i></span>
+            <div class="stat-body"><div class="stat-value" th:text="${report.unassigned}"></div><div class="stat-label">Active and unassigned</div></div></div>
+        <div class="card stat-card"><span class="stat-icon"><i class="fa-solid fa-rotate-left"></i></span>
+            <div class="stat-body"><div class="stat-value" th:text="${report.reopenedOrEscalated}"></div><div class="stat-label">Reopened or escalated</div></div></div>
+    </div>
+
+    <div class="form-row" style="margin-top:1rem;align-items:flex-start;">
+        <div>
+            <div class="section-title"><h2>By status</h2></div>
+            <div class="table-wrap"><table>
+                <thead><tr><th>Status</th><th>Tickets</th></tr></thead>
+                <tbody><tr th:each="e : ${report.countsByStatus}">
+                    <td><span class="badge" th:classappend="'badge-' + ${e.key.toLowerCase()}" th:text="${e.key}"></span></td>
+                    <td th:text="${e.value}"></td></tr></tbody>
+            </table></div>
         </div>
-        <div class="card stat-card">
-            <span class="stat-icon"><i class="fa-solid fa-stopwatch"></i></span>
-            <div class="stat-body">
-                <div class="stat-value" th:text="${#numbers.formatDecimal(summary.averageResolutionHours, 1, 1)} + 'h'"></div>
-                <div class="stat-label">Avg. Resolution Time</div>
-            </div>
+        <div>
+            <div class="section-title"><h2>By category</h2></div>
+            <div class="table-wrap"><table>
+                <thead><tr><th>Category</th><th>Tickets</th></tr></thead>
+                <tbody>
+                <tr th:if="${#maps.isEmpty(report.countsByCategory)}"><td colspan="2" class="muted">No tickets in this period.</td></tr>
+                <tr th:each="e : ${report.countsByCategory}"><td th:text="${e.key}"></td><td th:text="${e.value}"></td></tr>
+                </tbody>
+            </table></div>
         </div>
-        <div class="card stat-card">
-            <span class="stat-icon"><i class="fa-solid fa-star"></i></span>
-            <div class="stat-body">
-                <div class="stat-value" th:text="${summary.feedbackCount > 0} ? ${#numbers.formatDecimal(summary.averageSatisfactionRating, 1, 1)} + '/5' : 'N/A'"></div>
-                <div class="stat-label">Avg. Satisfaction (<span th:text="${summary.feedbackCount}"></span> ratings)</div>
-            </div>
+        <div>
+            <div class="section-title"><h2>By priority</h2></div>
+            <div class="table-wrap"><table>
+                <thead><tr><th>Priority</th><th>Tickets</th></tr></thead>
+                <tbody><tr th:each="e : ${report.countsByPriority}">
+                    <td th:text="${#strings.capitalize(#strings.toLowerCase(e.key))}"></td><td th:text="${e.value}"></td></tr></tbody>
+            </table></div>
         </div>
     </div>
 
-    <div class="section-title"><h2><i class="fa-solid fa-layer-group"></i> Tickets by Status</h2></div>
-    <table>
-        <thead><tr><th>Status</th><th>Count</th></tr></thead>
-        <tbody>
-        <tr th:each="entry : ${summary.countsByStatus}">
-            <td><span class="badge" th:classappend="'badge-' + ${entry.key.toLowerCase()}" th:text="${entry.key}"></span></td>
-            <td th:text="${entry.value}"></td>
-        </tr>
-        </tbody>
-    </table>
+    <div class="section-title"><h2><i class="fa-solid fa-headset"></i> Staff performance</h2></div>
+    <p class="muted" th:if="${#lists.isEmpty(report.staff)}">No tickets have been assigned to staff in this period.</p>
+    <div class="table-wrap" th:unless="${#lists.isEmpty(report.staff)}"><table>
+        <thead><tr><th>Staff member</th><th>Assigned</th><th>Resolved / closed</th><th>Avg. resolution</th><th>Avg. rating</th></tr></thead>
+        <tbody><tr th:each="s : ${report.staff}">
+            <td th:text="${s.name}"></td>
+            <td th:text="${s.assigned}"></td>
+            <td th:text="${s.resolved}"></td>
+            <td th:text="${s.resolved > 0} ? ${#numbers.formatDecimal(s.averageResolutionHours, 1, 1)} + 'h' : '-'"></td>
+            <td th:text="${s.ratings > 0} ? ${#numbers.formatDecimal(s.averageRating, 1, 1)} + '/5 (' + ${s.ratings} + ')' : '-'"></td>
+        </tr></tbody>
+    </table></div>
 </section>
 </div>
 </body>

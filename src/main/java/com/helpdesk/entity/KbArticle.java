@@ -40,11 +40,13 @@ public class KbArticle {
 
     // Not @Lob: Hibernate 6 maps @Lob String fields to CLOB, which its
     // stricter function-argument validation then refuses to pass to LOWER()
-    // in KbArticleRepository.search(...). columnDefinition = "TEXT" alone
-    // still gives us a MySQL TEXT column, just mapped as a plain String
-    // (VARCHAR-like) type that LOWER()/LIKE work with normally.
+    // in KbArticleRepository.search(...). We're on SQL Server here, where the
+    // legacy TEXT type can't be passed to LOWER()/LIKE at all ("Argument data
+    // type text is invalid for argument 1 of lower function"). NVARCHAR(MAX)
+    // is SQL Server's modern unbounded-string type and behaves like a plain
+    // string column for LOWER()/LIKE, while still allowing unlimited length.
     @NotBlank
-    @Column(name = "content", nullable = false, columnDefinition = "TEXT")
+    @Column(name = "content", nullable = false, columnDefinition = "NVARCHAR(MAX)")
     private String content;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -63,6 +65,15 @@ public class KbArticle {
     @Column(name = "view_count", nullable = false)
     @Builder.Default
     private int viewCount = 0;
+
+    /** "Was this helpful?" votes from students. */
+    @Column(name = "helpful_count", nullable = false, columnDefinition = "int default 0")
+    @Builder.Default
+    private int helpfulCount = 0;
+
+    @Column(name = "not_helpful_count", nullable = false, columnDefinition = "int default 0")
+    @Builder.Default
+    private int notHelpfulCount = 0;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

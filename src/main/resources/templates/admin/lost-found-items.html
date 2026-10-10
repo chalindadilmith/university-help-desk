@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:replace="~{fragments/layout :: layout('All Lost &amp; Found Reports', 'lost-found-items', ~{::section})}">
+<section>
+    <h1><i class="fa-solid fa-box-open"></i> All Lost &amp; Found Reports</h1>
+    <p class="muted">Every report in the system. Remove duplicates or inappropriate posts; the reporter and any claimants are notified.</p>
+    <p><a th:href="@{/admin/lost-found}" class="btn btn-sm btn-outline"><i class="fa-solid fa-hand-holding-heart"></i> Pending claims</a></p>
+    <div class="alert alert-success" th:if="${success}"><i class="fa-solid fa-circle-check"></i><span th:text="${success}"></span></div>
+    <div class="alert alert-error" th:if="${error}"><i class="fa-solid fa-circle-exclamation"></i><span th:text="${error}"></span></div>
+    <div class="empty-state" th:if="${#lists.isEmpty(items)}"><i class="fa-regular fa-folder-open"></i>No reports yet.</div>
+    <div class="table-wrap" th:unless="${#lists.isEmpty(items)}">
+    <table>
+        <thead><tr><th>Type</th><th>Description</th><th>Location</th><th>Date</th><th>Reporter</th><th>Status</th><th>Remove</th></tr></thead>
+        <tbody>
+        <tr th:each="i : ${items}">
+            <td th:text="${i.itemType}"></td>
+            <td th:text="${i.description}"></td>
+            <td th:text="${i.location}"></td>
+            <td th:text="${#temporals.format(i.itemDate, 'dd MMM yyyy')}"></td>
+            <td th:text="${i.reporter.fullName}"></td>
+            <td th:text="${i.status}"></td>
+            <td>
+                <form th:action="@{/admin/lost-found/items/{id}/remove(id=${i.id})}" method="post" style="display:flex;gap:.4rem;">
+                    <input type="text" name="reason" required="required" minlength="5" maxlength="300" placeholder="Reason" aria-label="Reason for removal"/>
+                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirmAction('Remove this report and its claims?')">Remove</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    </div>
+</section>
+</div>
+</body>
+</html>

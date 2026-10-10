@@ -4,21 +4,46 @@
 <div th:replace="~{fragments/layout :: layout('Audit Log', 'audit-log', ~{::section})}">
 <section>
     <h1><i class="fa-solid fa-clock-rotate-left"></i> Audit Log</h1>
-    <p class="muted">Every administrative action, most recent first (UC-02).</p>
+    <p class="muted">The latest administrative actions, grouped by area and by day (UC-02).</p>
 
-    <div class="empty-state" th:if="${#lists.isEmpty(logs)}"><i class="fa-regular fa-folder-open"></i>No audit entries yet.</div>
-    <table th:unless="${#lists.isEmpty(logs)}">
-        <thead><tr><th>When</th><th>Actor</th><th>Action</th><th>Target</th><th>Details</th></tr></thead>
-        <tbody>
-        <tr th:each="log : ${logs}">
-            <td th:text="${#temporals.format(log.createdAt, 'dd MMM yyyy, HH:mm')}"></td>
-            <td th:text="${log.actor.fullName}"></td>
-            <td th:text="${log.action}"></td>
-            <td th:text="${log.targetEntity} + (${log.targetId} != null ? ' #' + ${log.targetId} : '')"></td>
-            <td th:text="${log.details}"></td>
-        </tr>
-        </tbody>
-    </table>
+    <nav class="audit-tabs">
+        <a class="chip" th:classappend="${selected == null} ? 'active'" th:href="@{/admin/audit-log(q=${q})}">
+            <i class="fa-solid fa-layer-group"></i> All <span class="chip-count" th:text="${totalAll}"></span>
+        </a>
+        <a class="chip" th:each="c : ${categories}" th:classappend="${selected == c} ? 'active'" th:href="@{/admin/audit-log(category=${c.key},q=${q})}">
+            <i class="fa-solid" th:classappend="${c.icon}"></i> <span th:text="${c.title}"></span>
+            <span class="chip-count" th:text="${counts.get(c)}"></span>
+        </a>
+    </nav>
+
+    <form th:action="@{/admin/audit-log}" method="get" class="audit-toolbar">
+        <input type="hidden" name="category" th:value="${selected != null} ? ${selected.key} : ''"/>
+        <input type="text" name="q" th:value="${q}" placeholder="Search by person, action or details"/>
+        <button type="submit" class="btn btn-sm"><i class="fa-solid fa-magnifying-glass"></i> Search</button>
+        <a th:href="@{/admin/audit-log}" class="btn btn-sm btn-outline">Reset</a>
+        <span class="muted" th:text="'Showing ' + ${totalShown} + ' of ' + ${totalAll}"></span>
+    </form>
+
+    <div class="empty-state" th:if="${#lists.isEmpty(groups)}"><i class="fa-regular fa-folder-open"></i>No audit entries match.</div>
+
+    <div class="audit-day" th:each="g : ${groups}">
+        <h3 th:text="${g.label()}"></h3>
+        <ul class="audit-list">
+            <li class="audit-item" th:each="e : ${g.entries()}">
+                <span class="audit-icon" th:classappend="'audit-tone-' + ${e.tone()}"><i class="fa-solid" th:classappend="${e.category().icon}"></i></span>
+                <div class="audit-main">
+                    <div><strong th:text="${e.label()}"></strong>
+                        <span class="audit-cat" th:text="${e.category().title}"></span></div>
+                    <div class="audit-meta">
+                        by <strong th:text="${e.log().actor.fullName}"></strong>
+                        <span th:if="${e.log().targetEntity != null}" th:text="'· ' + ${e.log().targetEntity} + (${e.log().targetId} != null ? ' #' + ${e.log().targetId} : '')"></span>
+                    </div>
+                    <div class="audit-details" th:if="${e.log().details != null and !e.log().details.isBlank()}" th:text="${e.log().details}"></div>
+                </div>
+                <span class="audit-time" th:text="${#temporals.format(e.log().createdAt, 'HH:mm')}"></span>
+            </li>
+        </ul>
+    </div>
 </section>
 </div>
 </body>

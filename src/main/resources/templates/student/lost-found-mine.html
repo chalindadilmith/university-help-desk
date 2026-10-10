@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:replace="~{fragments/layout :: layout('My Reports &amp; Claims', 'lost-found', ~{::section})}">
+<section>
+    <a th:href="@{/student/lost-found}" class="back-link"><i class="fa-solid fa-arrow-left"></i> Back to Lost &amp; Found</a>
+    <h1 class="mt-1"><i class="fa-solid fa-list-check"></i> My reports &amp; claims</h1>
+
+    <div class="section-title"><h2><i class="fa-solid fa-box-open"></i> My reports</h2></div>
+    <div class="empty-state" th:if="${#lists.isEmpty(reports)}"><i class="fa-regular fa-folder-open"></i>You have not reported any items.</div>
+    <table th:unless="${#lists.isEmpty(reports)}">
+        <thead><tr><th>Type</th><th>Description</th><th>Location</th><th>Date</th><th>Status</th><th></th></tr></thead>
+        <tbody>
+        <tr th:each="r : ${reports}">
+            <td th:text="${r.itemType}"></td>
+            <td th:text="${r.description}"></td>
+            <td th:text="${r.location}"></td>
+            <td th:text="${#temporals.format(r.itemDate, 'dd MMM yyyy')}"></td>
+            <td><span class="badge" th:classappend="'badge-' + ${r.status.name().toLowerCase()}" th:text="${r.status}"></span></td>
+            <td>
+                <a th:href="@{/student/lost-found/{id}(id=${r.id})}" class="btn btn-sm btn-outline"><i class="fa-regular fa-eye"></i> View</a>
+                <a th:if="${r.status.name() == 'ACTIVE'}" th:href="@{/student/lost-found/{id}/edit(id=${r.id})}" class="btn btn-sm btn-outline"><i class="fa-solid fa-pen"></i> Edit</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div class="section-title"><h2><i class="fa-solid fa-hand"></i> My claims</h2></div>
+    <div class="empty-state" th:if="${#lists.isEmpty(claims)}"><i class="fa-regular fa-folder-open"></i>You have not claimed any items.</div>
+    <table th:unless="${#lists.isEmpty(claims)}">
+        <thead><tr><th>Reference</th><th>Item</th><th>Status</th><th></th></tr></thead>
+        <tbody>
+        <tr th:each="c : ${claims}">
+            <td th:text="${c.referenceNo}"></td>
+            <td th:text="${c.item.description}"></td>
+            <td><span class="badge" th:classappend="'badge-' + ${c.status.name().toLowerCase()}" th:text="${c.status}"></span></td>
+            <td><a th:href="@{/student/lost-found/{id}(id=${c.item.id})}" class="btn btn-sm btn-outline"><i class="fa-regular fa-eye"></i> View</a></td>
+        </tr>
+        </tbody>
+    </table>
+</section>
+</div>
+</body>
+</html>

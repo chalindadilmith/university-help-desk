@@ -52,6 +52,14 @@ public class Ticket {
     @JoinColumn(name = "assigned_staff_id")
     private User assignedStaff;
 
+    /**
+     * Pool chosen by the routing rule (category + priority) when the ticket was created.
+     * Null means "no rule matched" and the category's default pool is used instead.
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "routed_pool_id")
+    private JobPool routedPool;
+
     @NotBlank
     @Size(max = 150)
     @Column(name = "subject", nullable = false, length = 150)

@@ -14,4 +14,9 @@ public interface NotificationService {
     long unreadCount(Long userId);
 
     void markAllRead(Long userId);
+
+    org.springframework.data.domain.Page<Notification> page(Long userId, int page, int size);
+
+    /** Marks one of the user's own notifications as read and returns it (null if it is not theirs). */
+    Notification markRead(Long userId, Long notificationId);
 }

@@ -25,6 +25,19 @@ public class FeedbackServiceImpl implements FeedbackService {
     @Override
     @Transactional
     public Feedback submitFeedback(Ticket ticket, User student, int rating, String comment) {
+        if (!ticket.getStudent().getId().equals(student.getId())) {
+            throw new BusinessRuleException("You can only rate your own tickets.");
+        }
+        if (rating < 1 || rating > 5) {
+            throw new BusinessRuleException("The rating must be between 1 and 5.");
+        }
+        comment = comment == null ? null : comment.trim();
+        if (comment != null && comment.isEmpty()) {
+            comment = null;
+        }
+        if (comment != null && comment.length() > 1000) {
+            throw new BusinessRuleException("The comment must be 1000 characters or fewer.");
+        }
         if (ticket.getStatus() != TicketStatus.RESOLVED && ticket.getStatus() != TicketStatus.CLOSED) {
             throw new BusinessRuleException("Feedback can only be submitted once a ticket is Resolved or Closed.");
         }

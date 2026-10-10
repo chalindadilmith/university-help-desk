@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:replace="~{fragments/layout :: layout('Ticket ' + ${ticket.ticketRef}, 'admin-tickets', ~{::section})}">
+<section>
+    <a th:href="@{/admin/tickets}" class="back-link"><i class="fa-solid fa-arrow-left"></i> Back to Tickets</a>
+    <div class="flex-between mt-1">
+        <h1><i class="fa-solid fa-ticket"></i> <span th:text="${ticket.subject}"></span></h1>
+        <span class="badge" th:classappend="'badge-' + ${ticket.status.name().toLowerCase()}" th:text="${ticket.status}"></span>
+    </div>
+    <p class="muted" th:text="${ticket.ticketRef}"></p>
+
+    <div class="alert alert-success" th:if="${success}"><i class="fa-solid fa-circle-check"></i><span th:text="${success}"></span></div>
+    <div class="alert alert-error" th:if="${error}"><i class="fa-solid fa-circle-exclamation"></i><span th:text="${error}"></span></div>
+
+    <div class="actions">
+        <a th:href="@{/admin/tickets/{id}/edit(id=${ticket.id})}" class="btn btn-sm"><i class="fa-solid fa-pen"></i> Edit / Reassign</a>
+        <form th:action="@{/admin/tickets/{id}/delete(id=${ticket.id})}" method="post" style="display:inline;">
+            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirmAction('Delete this ticket permanently? This removes its replies and attachments and cannot be undone.')"><i class="fa-solid fa-trash"></i> Delete Ticket</button>
+        </form>
+    </div>
+
+    <div class="card report-section">
+        <h2>Ticket details</h2>
+        <dl class="kv">
+            <dt>Reference</dt><dd th:text="${ticket.ticketRef}"></dd>
+            <dt>Category</dt><dd th:text="${ticket.category.name}"></dd>
+            <dt>Priority</dt><dd th:text="${#strings.capitalize(#strings.toLowerCase(ticket.priority.name()))}"></dd>
+            <dt>Status</dt><dd th:text="${ticket.status}"></dd>
+            <dt>Created</dt><dd th:text="${#temporals.format(ticket.createdAt, 'dd MMM yyyy, HH:mm')}"></dd>
+            <dt>Assigned to</dt>
+            <dd>
+                <strong th:if="${ticket.assignedStaff != null}" th:text="${ticket.assignedStaff.fullName}"></strong>
+                <span th:if="${ticket.assignedStaff != null}" class="muted" th:text="' (' + ${ticket.assignedStaff.email} + ')'"></span>
+                <span th:unless="${ticket.assignedStaff != null}" class="unassigned-tag">Unassigned</span>
+            </dd>
+            <dt>Raised by</dt>
+            <dd>
+                <span th:text="${ticket.student.fullName}"></span>
+                <span class="muted" th:text="' (' + ${ticket.student.email} + ')'"></span>
+                <a th:href="@{/reports/users/{id}(id=${ticket.student.id})}" class="btn btn-sm btn-outline"><i class="fa-solid fa-id-card"></i> Member report</a>
+            </dd>
+        </dl>
+        <h3>Description</h3>
+        <p class="long-text" th:text="${ticket.description}"></p>
+        <div th:unless="${#lists.isEmpty(attachments)}">
+            <strong>Attachments</strong>
+            <ul>
+                <li th:each="a : ${attachments}">
+                    <a th:href="@{/admin/tickets/{id}/attachments/{aid}(id=${ticket.id},aid=${a.id})}" target="_blank" rel="noopener" th:text="${a.fileName}"></a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="section-title"><h2><i class="fa-solid fa-comments"></i> Activity</h2></div>
+    <div class="card">
+        <div class="empty-state" th:if="${#lists.isEmpty(comments)}"><i class="fa-regular fa-comment-dots"></i>No replies yet.</div>
+        <div th:each="c : ${comments}" class="mt-1" style="border-bottom:1px solid var(--border-color); padding-bottom:0.6rem;">
+            <strong th:text="${c.author.fullName}"></strong>
+            <span class="muted" th:text="${' - ' + #temporals.format(c.createdAt, 'dd MMM, HH:mm')}"></span>
+            <span th:if="${c.resolutionNote}" class="badge badge-resolved">Resolution</span>
+            <span th:if="${c.internal}" class="badge badge-escalated">Internal note</span>
+            <p th:text="${c.comment}"></p>
+        </div>
+    </div>
+</section>
+</div>
+</body>
+</html>

@@ -6,21 +6,74 @@
     <h1><i class="fa-solid fa-ticket"></i> Ticket Queue</h1>
     <p class="muted">Tickets already assigned to you, plus unassigned tickets in your work-pool's categories.</p>
 
-    <div class="empty-state" th:if="${#lists.isEmpty(tickets)}"><i class="fa-regular fa-circle-check"></i>Nothing in your queue right now.</div>
-    <table th:unless="${#lists.isEmpty(tickets)}">
-        <thead><tr><th>Ref</th><th>Subject</th><th>Category</th><th>Priority</th><th>Status</th><th>Student</th><th></th></tr></thead>
+    <div class="alert alert-success" th:if="${success}"><i class="fa-solid fa-circle-check"></i><span th:text="${success}"></span></div>
+    <div class="alert alert-error" th:if="${error}"><i class="fa-solid fa-circle-exclamation"></i><span th:text="${error}"></span></div>
+
+    <div class="section-title">
+        <p class="count-line"><strong th:text="${queueTotal}">0</strong> ticket(s) in your queue<span th:if="${view.totalItems != queueTotal}"> &middot; <strong th:text="${view.totalItems}"></strong> match the filters</span></p>
+        <div class="actions">
+            <a th:href="@{/staff/tickets/all}" class="btn btn-sm btn-outline"><i class="fa-solid fa-list"></i> All Tickets</a>
+            <a th:href="@{/staff/tickets/new}" class="btn btn-sm"><i class="fa-solid fa-plus"></i> New Ticket</a>
+        </div>
+    </div>
+    <div class="chip-row">
+        <a class="chip" th:classappend="${scope == null or scope == ''} ? 'active'" th:href="@{/staff/tickets}">Everything</a>
+        <a class="chip" th:classappend="${scope == 'active'} ? 'active'" th:href="@{/staff/tickets(scope='active')}">Active</a>
+        <a class="chip" th:classappend="${scope == 'unassigned'} ? 'active'" th:href="@{/staff/tickets(scope='unassigned')}">Unassigned</a>
+        <a class="chip" th:classappend="${scope == 'old'} ? 'active'" th:href="@{/staff/tickets(scope='old')}">Open over 3 days</a>
+    </div>
+    <form th:action="@{/staff/tickets}" method="get" class="card form-row" style="align-items:flex-end;">
+        <input type="hidden" name="scope" th:value="${scope}"/>
+        <div>
+            <label for="q">Search</label>
+            <input type="text" id="q" name="q" th:value="${q}" placeholder="Reference, subject, category or student"/>
+        </div>
+        <div>
+            <label for="statusFilter">Status</label>
+            <select id="statusFilter" name="status">
+                <option value="">All statuses</option>
+                <option th:each="s : ${statuses}" th:value="${s.name()}" th:text="${s}" th:selected="${s.name() == statusFilter}"></option>
+            </select>
+        </div>
+        <div>
+            <label for="sort">Sort by</label>
+            <select id="sort" name="sort">
+                <option value="" th:selected="${sort == null or sort == ''}">Newest first</option>
+                <option value="oldest" th:selected="${sort == 'oldest'}">Oldest first</option>
+                <option value="priority" th:selected="${sort == 'priority'}">Highest priority</option>
+                <option value="status" th:selected="${sort == 'status'}">Status</option>
+            </select>
+        </div>
+        <div>
+            <button type="submit" class="btn">Apply</button>
+            <a th:href="@{/staff/tickets}" class="btn btn-outline">Reset</a>
+        </div>
+    </form>
+    <div class="empty-state" th:if="${#lists.isEmpty(tickets)}"><i class="fa-regular fa-circle-check"></i>Nothing in your queue matches right now.</div>
+    <div class="table-wrap" th:unless="${#lists.isEmpty(tickets)}">
+    <table>
+        <thead><tr><th>Ref</th><th>Subject</th><th>Category</th><th>Priority</th><th>Status</th><th>Student</th><th>Assigned to</th><th></th></tr></thead>
         <tbody>
         <tr th:each="t : ${tickets}">
             <td th:text="${t.ticketRef}"></td>
             <td th:text="${t.subject}"></td>
             <td th:text="${t.category.name}"></td>
-            <td th:text="${t.priority}"></td>
+            <td th:text="${#strings.capitalize(#strings.toLowerCase(t.priority.name()))}"></td>
             <td><span class="badge" th:classappend="'badge-' + ${t.status.name().toLowerCase()}" th:text="${t.status}"></span></td>
             <td th:text="${t.student.fullName}"></td>
+            <td><span th:if="${t.assignedStaff != null}" th:text="${t.assignedStaff.fullName}"></span><span th:unless="${t.assignedStaff != null}" class="unassigned-tag">Unassigned</span></td>
             <td><a th:href="@{/staff/tickets/{id}(id=${t.id})}" class="btn btn-sm btn-outline"><i class="fa-regular fa-eye"></i> Open</a></td>
         </tr>
         </tbody>
     </table>
+    </div>
+    <div class="pager" th:if="${view.totalPages > 1}">
+        <a th:if="${view.hasPrevious}" class="btn btn-sm btn-outline"
+           th:href="@{/staff/tickets(q=${q},status=${statusFilter},sort=${sort},scope=${scope},page=${view.page - 1})}">Previous</a>
+        <span class="muted" th:text="'Page ' + ${view.page} + ' of ' + ${view.totalPages}"></span>
+        <a th:if="${view.hasNext}" class="btn btn-sm btn-outline"
+           th:href="@{/staff/tickets(q=${q},status=${statusFilter},sort=${sort},scope=${scope},page=${view.page + 1})}">Next</a>
+    </div>
 </section>
 </div>
 </body>

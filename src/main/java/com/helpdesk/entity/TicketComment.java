@@ -47,6 +47,11 @@ public class TicketComment {
     @Builder.Default
     private boolean resolutionNote = false;
 
+    /** Internal staff note: never shown to the student. */
+    @Column(name = "is_internal", nullable = false, columnDefinition = "bit default 0")
+    @Builder.Default
+    private boolean internal = false;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 

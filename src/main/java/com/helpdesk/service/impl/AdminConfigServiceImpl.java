@@ -107,6 +107,61 @@ public class AdminConfigServiceImpl implements AdminConfigService {
     }
 
     @Override
+    @Transactional
+    public int addStaffToPool(Long poolId, java.util.Collection<Long> staffUserIds, User actingAdmin) {
+        JobPool pool = poolRepository.findById(poolId)
+                .orElseThrow(() -> new ResourceNotFoundException("Pool not found: " + poolId));
+        if (staffUserIds == null || staffUserIds.isEmpty()) {
+            throw new BusinessRuleException("Select at least one staff member to add.");
+        }
+        int added = 0;
+        for (Long id : new java.util.LinkedHashSet<>(staffUserIds)) {
+            User staff = userRepository.findById(id)
+                    .orElseThrow(() -> new ResourceNotFoundException("User not found: " + id));
+            if (staff.getRole() != com.helpdesk.entity.Role.STAFF) {
+                throw new BusinessRuleException(staff.getFullName() + " is not a staff account.");
+            }
+            if (staff.getStatus() != com.helpdesk.entity.AccountStatus.ACTIVE) {
+                throw new BusinessRuleException(staff.getFullName() + " is not active, so cannot join a work-pool.");
+            }
+            if (pool.getStaffMembers().stream().noneMatch(m -> m.getId().equals(staff.getId()))) {
+                pool.getStaffMembers().add(staff);
+                added++;
+                auditLogService.log(actingAdmin, "ASSIGN_STAFF_TO_POOL", "JobPool", poolId,
+                        staff.getEmail() + " added to " + pool.getName());
+            }
+        }
+        return added;
+    }
+
+    @Override
+    @Transactional
+    public void updateCategoryPool(Long categoryId, Long poolId, User actingAdmin) {
+        TicketCategory category = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found: " + categoryId));
+        JobPool pool = null;
+        if (poolId != null) {
+            pool = poolRepository.findById(poolId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Pool not found: " + poolId));
+        }
+        category.setPool(pool);
+        auditLogService.log(actingAdmin, "UPDATE_CATEGORY_POOL", "TicketCategory", categoryId,
+                category.getName() + " -> " + (pool == null ? "no pool" : pool.getName()));
+    }
+
+    @Override
+    @Transactional
+    public void updateRoutingRulePool(Long ruleId, Long poolId, User actingAdmin) {
+        RoutingRule rule = routingRuleRepository.findById(ruleId)
+                .orElseThrow(() -> new ResourceNotFoundException("Routing rule not found: " + ruleId));
+        JobPool pool = poolRepository.findById(poolId)
+                .orElseThrow(() -> new ResourceNotFoundException("Pool not found: " + poolId));
+        rule.setTargetPool(pool);
+        auditLogService.log(actingAdmin, "UPDATE_ROUTING_RULE", "RoutingRule", ruleId,
+                rule.getCategory().getName() + "/" + rule.getPriority() + " -> " + pool.getName());
+    }
+
+    @Override
     public List<RoutingRule> listRoutingRules() {
         return routingRuleRepository.findAllByOrderByCategoryNameAsc();
     }

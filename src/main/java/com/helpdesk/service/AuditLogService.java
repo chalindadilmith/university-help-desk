@@ -38,4 +38,13 @@ public class AuditLogService {
     public List<AuditLog> recentLogs() {
         return auditLogRepository.findTop100ByOrderByCreatedAtDesc();
     }
+
+    /** The last 500 entries - the audit page groups and filters these in memory. */
+    public List<AuditLog> recentLogsExtended() {
+        return auditLogRepository.findTop500ByOrderByCreatedAtDesc();
+    }
+
+    public List<AuditLog> recentByActor(Long actorId) {
+        return auditLogRepository.findTop30ByActorIdOrderByCreatedAtDesc(actorId);
+    }
 }

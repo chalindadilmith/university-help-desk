@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:replace="~{fragments/layout :: layout('Notifications', 'notifications', ~{::section})}">
+<section>
+    <div class="flex-between">
+        <h1><i class="fa-solid fa-bell"></i> Notifications</h1>
+        <form th:action="@{/notifications/read-all}" method="post">
+            <button type="submit" class="btn btn-outline"><i class="fa-solid fa-check-double"></i> Mark all as read</button>
+        </form>
+    </div>
+    <div class="empty-state" th:if="${#lists.isEmpty(notifications)}"><i class="fa-regular fa-circle-check"></i>You're all caught up.</div>
+    <div class="card" th:unless="${#lists.isEmpty(notifications)}">
+        <a class="notif-item" th:each="n : ${notifications}" th:classappend="${!n.read} ? 'unread'"
+           th:href="@{/notifications/{id}/open(id=${n.id})}" style="text-decoration:none;color:inherit;display:flex;gap:.7rem;">
+            <i class="fa-solid fa-circle-info"></i>
+            <div>
+                <div th:text="${n.message}"></div>
+                <div class="muted" th:text="${#temporals.format(n.createdAt, 'dd MMM yyyy, HH:mm')}"></div>
+            </div>
+        </a>
+    </div>
+    <div class="pager" th:if="${totalPages > 1}">
+        <a th:if="${page > 1}" class="btn btn-sm btn-outline" th:href="@{/notifications(page=${page - 1})}">Previous</a>
+        <span class="muted" th:text="'Page ' + ${page} + ' of ' + ${totalPages}"></span>
+        <a th:if="${page < totalPages}" class="btn btn-sm btn-outline" th:href="@{/notifications(page=${page + 1})}">Next</a>
+    </div>
+</section>
+</div>
+</body>
+</html>

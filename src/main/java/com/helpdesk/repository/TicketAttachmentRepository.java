@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface TicketAttachmentRepository extends JpaRepository<TicketAttachment, Long> {
     List<TicketAttachment> findByTicketId(Long ticketId);
+
+    java.util.Optional<TicketAttachment> findByIdAndTicketId(Long id, Long ticketId);
 }

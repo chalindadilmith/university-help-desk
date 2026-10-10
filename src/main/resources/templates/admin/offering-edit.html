@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:replace="~{fragments/layout :: layout('Edit Offering', 'modules', ~{::section})}">
+<section>
+    <h1><i class="fa-solid fa-pen-to-square"></i> Edit Offering <span th:text="${offering.course.code} + ' - ' + ${offering.semester.name}"></span></h1>
+    <div class="alert alert-error" th:if="${error}"><i class="fa-solid fa-circle-exclamation"></i><span th:text="${error}"></span></div>
+    <div class="card" style="max-width:560px;">
+        <form th:action="@{/admin/modules/offerings/{id}(id=${offering.id})}" th:object="${offeringForm}" method="post">
+            <label for="semesterId">Semester</label>
+            <select id="semesterId" th:field="*{semesterId}">
+                <option th:each="s : ${semesters}" th:value="${s.id}" th:text="${s.name}"></option>
+            </select>
+
+            <label for="courseId">Module</label>
+            <select id="courseId" th:field="*{courseId}">
+                <option th:each="c : ${courses}" th:value="${c.id}" th:text="${c.code} + ' - ' + ${c.name}"></option>
+            </select>
+
+            <label for="capacity">Capacity</label>
+            <input type="number" min="1" id="capacity" th:field="*{capacity}"/>
+            <span class="field-error" th:if="${#fields.hasErrors('capacity')}" th:errors="*{capacity}"></span>
+
+            <label for="scheduleInfo">Schedule</label>
+            <input type="text" id="scheduleInfo" th:field="*{scheduleInfo}" placeholder="e.g. Mon/Wed 9-11am"/>
+            <span class="field-error" th:if="${#fields.hasErrors('scheduleInfo')}" th:errors="*{scheduleInfo}"></span>
+
+            <div class="mt-1">
+                <button type="submit" class="btn"><i class="fa-solid fa-floppy-disk"></i> Save Changes</button>
+                <a class="btn btn-secondary" th:href="@{/admin/modules(semesterId=${offering.semester.id})}">Cancel</a>
+            </div>
+        </form>
+    </div>
+</section>
+</div>
+</body>
+</html>

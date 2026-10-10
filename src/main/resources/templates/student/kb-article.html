@@ -5,10 +5,30 @@
 <section>
     <a th:href="@{/student/kb}">&larr; Back to Knowledge Base</a>
     <h1 class="mt-1" th:text="${article.title}"></h1>
-    <p class="muted" th:text="${article.category.name} + ' &middot; ' + ${article.viewCount} + ' views'"></p>
+    <p class="muted"
+       th:text="${article.category.name} + ' &middot; ' + ${article.viewCount} + ' views &middot; Last updated ' + ${#temporals.format(article.updatedAt != null ? article.updatedAt : article.createdAt, 'dd MMM yyyy')}"></p>
     <div class="card">
         <p th:text="${article.content}" style="white-space: pre-wrap;"></p>
     </div>
+
+    <div class="card">
+        <p class="muted" th:if="${voteMessage}" th:text="${voteMessage}"></p>
+        <form th:unless="${voteMessage}" th:action="@{/student/kb/{id}/vote(id=${article.id})}" method="post" style="display:flex;gap:.6rem;align-items:center;flex-wrap:wrap;">
+            <span>Was this article helpful?</span>
+            <button type="submit" name="helpful" value="true" class="btn btn-sm btn-outline"><i class="fa-regular fa-thumbs-up"></i> Yes</button>
+            <button type="submit" name="helpful" value="false" class="btn btn-sm btn-outline"><i class="fa-regular fa-thumbs-down"></i> No</button>
+        </form>
+    </div>
+
+    <div th:if="${!#lists.isEmpty(related)}">
+        <div class="section-title"><h2>Related articles</h2></div>
+        <div class="card-grid">
+            <div class="card" th:each="r : ${related}">
+                <h3><a th:href="@{/student/kb/{id}(id=${r.id})}" th:text="${r.title}"></a></h3>
+            </div>
+        </div>
+    </div>
+
     <p>Didn't answer your question? <a th:href="@{/student/tickets}">Create a support ticket</a>.</p>
 </section>
 </div>
