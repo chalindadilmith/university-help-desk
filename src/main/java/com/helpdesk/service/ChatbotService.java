@@ -12,4 +12,13 @@ public interface ChatbotService {
      * appropriate for a semester project's time budget.
      */
     ChatbotReply respond(String message);
+
+    /**
+     * General-purpose reply: when an AI API key is configured, answers any question
+     * conversationally (using matching knowledge-base articles as context and the recent
+     * conversation history); otherwise, or if the AI call fails, falls back to
+     * {@link #respond(String)}. {@code history} is the prior turns, oldest first. {@code student} (may be null) is the signed-in
+     * student, whose own tickets / Lost &amp; Found / registration data is given to the AI as context.
+     */
+    ChatbotReply respond(String message, java.util.List<com.helpdesk.dto.ChatTurn> history, com.helpdesk.entity.User student);
 }

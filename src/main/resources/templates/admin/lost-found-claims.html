@@ -4,29 +4,69 @@
 <div th:replace="~{fragments/layout :: layout('Lost &amp; Found Claims', 'lost-found', ~{::section})}">
 <section>
     <h1><i class="fa-solid fa-hand-holding-heart"></i> Pending Lost &amp; Found Claims</h1>
-    <p class="muted">Verify ownership before telling the reporter to hand the item over (UC-F1-01).</p>
-
+    <p class="muted">Compare the reporter's photo with the claimant's evidence. Verify to send collection details, or reject with a reason.</p>
+    <div class="alert alert-success" th:if="${success}"><i class="fa-solid fa-circle-check"></i><span th:text="${success}"></span></div>
+    <div class="alert alert-error" th:if="${error}"><i class="fa-solid fa-circle-exclamation"></i><span th:text="${error}"></span></div>
     <div class="empty-state" th:if="${#lists.isEmpty(claims)}"><i class="fa-regular fa-circle-check"></i>No pending claims.</div>
 
-    <table th:unless="${#lists.isEmpty(claims)}">
-        <thead><tr><th>Item</th><th>Claimant</th><th>Reporter</th><th>Submitted</th><th></th></tr></thead>
-        <tbody>
-        <tr th:each="c : ${claims}">
-            <td th:text="${c.item.description}"></td>
-            <td th:text="${c.claimant.fullName}"></td>
-            <td th:text="${c.item.reporter.fullName}"></td>
-            <td th:text="${#temporals.format(c.createdAt, 'dd MMM, HH:mm')}"></td>
-            <td>
-                <form th:action="@{/admin/lost-found/{id}/approve(id=${c.id})}" method="post" style="display:inline;">
-                    <button type="submit" class="btn btn-sm btn-success"><i class="fa-solid fa-check"></i> Verify</button>
-                </form>
-                <form th:action="@{/admin/lost-found/{id}/reject(id=${c.id})}" method="post" style="display:inline;">
-                    <button type="submit" class="btn btn-sm btn-danger"><i class="fa-solid fa-xmark"></i> Reject</button>
-                </form>
-            </td>
-        </tr>
-        </tbody>
-    </table>
+    <div class="card" th:each="c : ${claims}">
+        <h3>
+            <span th:text="${c.referenceNo}"></span> &middot; <span th:text="${c.item.description}"></span>
+            <span class="badge badge-pending" th:if="${c.resubmissions > 0}" th:text="'Resubmission #' + ${c.resubmissions}"></span>
+        </h3>
+        <p class="muted" th:text="'Submitted ' + ${#temporals.format(c.createdAt, 'dd MMM yyyy, HH:mm')}"></p>
+        <div class="alert alert-error" th:if="${c.resubmissions > 0 and c.rejectionReason != null}">
+            <i class="fa-solid fa-circle-exclamation"></i><span>Previously rejected: <span th:text="${c.rejectionReason}"></span></span>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1rem;">
+            <div>
+                <h4><i class="fa-solid fa-box-open"></i> Reporter's item</h4>
+                <img th:if="${c.item.imageFilePath != null}" th:src="@{/admin/lost-found/items/{id}/image(id=${c.item.id})}"
+                     alt="Reporter's photo" style="max-width:100%;max-height:260px;border-radius:8px;"/>
+                <p class="muted" th:if="${c.item.imageFilePath == null}">(no photo - reported before photos were required)</p>
+                <p><strong th:text="${c.item.itemType}"></strong>: <span th:text="${c.item.description}"></span></p>
+                <p><i class="fa-solid fa-location-dot"></i> <span th:text="${c.item.location}"></span>
+                   &middot; <span th:text="${#temporals.format(c.item.itemDate, 'dd MMM yyyy')}"></span></p>
+                <p><i class="fa-solid fa-user"></i> Reporter: <span th:text="${c.item.reporter.fullName}"></span></p>
+            </div>
+            <div>
+                <h4><i class="fa-solid fa-hand"></i> Claimant's evidence</h4>
+                <img th:if="${c.proofFilePath != null and !#strings.endsWith(c.proofFilePath, '.pdf')}"
+                     th:src="@{/admin/lost-found/claims/{id}/proof(id=${c.id})}" alt="Claimant's photo"
+                     style="max-width:100%;max-height:260px;border-radius:8px;"/>
+                <p th:if="${c.proofFilePath != null and #strings.endsWith(c.proofFilePath, '.pdf')}">
+                    <a th:href="@{/admin/lost-found/claims/{id}/proof(id=${c.id})}" target="_blank"><i class="fa-solid fa-paperclip"></i> <span th:text="${c.proofFileName}"></span></a>
+                </p>
+                <p class="muted" th:if="${c.proofFilePath == null}">(no photo submitted)</p>
+                <p th:text="${c.proofDescription != null ? c.proofDescription : '(no description)'}"></p>
+                <p><i class="fa-solid fa-user"></i> <span th:text="${c.claimant.fullName}"></span>
+                   <span class="muted" th:if="${c.claimant.studentCode != null}" th:text="'(' + ${c.claimant.studentCode} + ')'"></span></p>
+            </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1rem;margin-top:1rem;">
+            <form th:action="@{/admin/lost-found/{id}/approve(id=${c.id})}" method="post">
+                <h4><i class="fa-solid fa-check"></i> Verify &amp; set collection details</h4>
+                <label>Collection place</label>
+                <input type="text" name="collectionLocation" value="University Help Desk" maxlength="200" required="required"/>
+                <label>Collection date</label>
+                <input type="date" name="collectionDate" th:value="${tomorrow}" th:min="${today}" required="required"/>
+                <label>Time / period</label>
+                <input type="text" name="collectionTime" value="10:00 AM - 4:00 PM" maxlength="100" required="required"/>
+                <label>Note (optional)</label>
+                <input type="text" name="collectionNote" maxlength="500" placeholder="e.g. Ask for the Lost &amp; Found counter"/>
+                <button type="submit" class="btn btn-sm btn-success"><i class="fa-solid fa-check"></i> Verify claim</button>
+            </form>
+            <form th:action="@{/admin/lost-found/{id}/reject(id=${c.id})}" method="post">
+                <h4><i class="fa-solid fa-xmark"></i> Reject</h4>
+                <label>Reason (sent to the student)</label>
+                <textarea name="reason" rows="4" required="required" minlength="10" maxlength="1000"
+                          placeholder="e.g. The photo does not match the item; please describe the scratches / contents."></textarea>
+                <button type="submit" class="btn btn-sm btn-danger"><i class="fa-solid fa-xmark"></i> Reject claim</button>
+            </form>
+        </div>
+    </div>
 </section>
 </div>
 </body>

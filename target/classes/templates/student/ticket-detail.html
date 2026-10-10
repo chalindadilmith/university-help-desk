@@ -10,6 +10,13 @@
     </div>
     <p class="muted" th:text="${ticket.ticketRef} + ' &middot; ' + ${ticket.category.name} + ' &middot; Priority: ' + ${ticket.priority}"></p>
 
+    <div class="actions mt-1">
+        <a th:if="${canEdit}" th:href="@{/student/tickets/{id}/edit(id=${ticket.id})}" class="btn btn-sm btn-outline"><i class="fa-solid fa-pen"></i> Edit Ticket</a>
+        <form th:action="@{/student/tickets/{id}/delete(id=${ticket.id})}" method="post" style="display:inline;">
+            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirmAction('Delete this ticket permanently? Submitted by mistake? This removes its replies and attachments and cannot be undone.')"><i class="fa-solid fa-trash"></i> Delete Ticket</button>
+        </form>
+    </div>
+
     <div class="alert alert-success" th:if="${success}"><i class="fa-solid fa-circle-check"></i><span th:text="${success}"></span></div>
     <div class="alert alert-error" th:if="${error}"><i class="fa-solid fa-circle-exclamation"></i><span th:text="${error}"></span></div>
 
@@ -17,7 +24,17 @@
         <p th:text="${ticket.description}"></p>
         <p class="muted" th:if="${ticket.assignedStaff != null}"><i class="fa-solid fa-headset"></i> Handled by <span th:text="${ticket.assignedStaff.fullName}"></span></p>
         <p class="muted" th:unless="${ticket.assignedStaff != null}"><i class="fa-regular fa-clock"></i> Not yet assigned to a staff member.</p>
+        <div th:unless="${#lists.isEmpty(attachments)}">
+            <strong>Attachments</strong>
+            <ul>
+                <li th:each="a : ${attachments}">
+                    <a th:href="@{/student/tickets/{id}/attachments/{aid}(id=${ticket.id},aid=${a.id})}" target="_blank" rel="noopener"
+                       th:text="${a.fileName}"></a>
+                </li>
+            </ul>
+        </div>
     </div>
+    <div class="alert alert-error" th:if="${attachmentFailed}"><i class="fa-solid fa-circle-exclamation"></i><span>Your ticket was created, but the attachments could not be saved. You can describe the problem in a reply instead.</span></div>
 
     <div class="section-title"><h2><i class="fa-solid fa-comments"></i> Activity</h2></div>
     <div class="card">
@@ -29,6 +46,16 @@
             <p th:text="${c.comment}"></p>
         </div>
     </div>
+
+    <div class="card" th:if="${canReply}">
+        <form th:action="@{/student/tickets/{id}/reply(id=${ticket.id})}" method="post">
+            <label for="reply">Add a reply</label>
+            <textarea id="reply" name="comment" required="required" maxlength="2000"></textarea>
+            <p class="muted" th:if="${ticket.status.name() == 'RESOLVED'}">Replying to a resolved ticket will reopen it.</p>
+            <button type="submit" class="btn"><i class="fa-solid fa-paper-plane"></i> Send Reply</button>
+        </form>
+    </div>
+    <p class="muted" th:unless="${canReply}">This ticket is closed. If the problem continues, please raise a new ticket.</p>
 
     <div th:if="${ticket.status.name() == 'RESOLVED'}" class="card">
         <form th:action="@{/student/tickets/{id}/reopen(id=${ticket.id})}" method="post">

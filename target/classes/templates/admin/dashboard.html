@@ -6,35 +6,90 @@
     <h1><i class="fa-solid fa-gauge-high"></i> Welcome back, <span sec:authentication="name">Admin</span></h1>
 
     <div class="card-grid">
-        <div class="card stat-card">
+        <a class="card stat-card" th:href="@{/admin/tickets}">
             <span class="stat-icon"><i class="fa-solid fa-ticket"></i></span>
             <div class="stat-body">
                 <div class="stat-value" th:text="${summary.totalTickets}"></div>
                 <div class="stat-label">Total Tickets</div>
             </div>
-        </div>
-        <div class="card stat-card">
+            <i class="fa-solid fa-chevron-right stat-hint"></i>
+        </a>
+        <a class="card stat-card" th:href="@{/admin/users}">
             <span class="stat-icon"><i class="fa-solid fa-users-gear"></i></span>
             <div class="stat-body">
                 <div class="stat-value" th:text="${staffAdminCount}"></div>
                 <div class="stat-label">Staff &amp; Admin Accounts</div>
             </div>
-        </div>
-        <div class="card stat-card">
+            <i class="fa-solid fa-chevron-right stat-hint"></i>
+        </a>
+        <a class="card stat-card" th:href="@{/admin/lost-found}">
             <span class="stat-icon"><i class="fa-solid fa-hand-holding-heart"></i></span>
             <div class="stat-body">
                 <div class="stat-value" th:text="${pendingClaims}"></div>
                 <div class="stat-label">Pending L&amp;F Claims</div>
             </div>
-        </div>
+            <i class="fa-solid fa-chevron-right stat-hint"></i>
+        </a>
+        <a class="card stat-card" th:href="@{/admin/registrations}">
+            <span class="stat-icon"><i class="fa-solid fa-user-check"></i></span>
+            <div class="stat-body">
+                <div class="stat-value" th:text="${pendingRegistrations}"></div>
+                <div class="stat-label">Pending Registrations</div>
+            </div>
+            <i class="fa-solid fa-chevron-right stat-hint"></i>
+        </a>
+    </div>
+
+    <div class="section-title">
+        <h2><i class="fa-solid fa-ticket"></i> Ticket Overview</h2>
+        <a th:href="@{/admin/tickets/new}" class="btn btn-sm"><i class="fa-solid fa-plus"></i> New Ticket</a>
+    </div>
+    <div class="card-grid">
+        <a class="card stat-card" th:href="@{/admin/tickets(scope='active')}"><span class="stat-icon"><i class="fa-solid fa-folder-open"></i></span>
+            <div class="stat-body"><div class="stat-value" th:text="${activeTickets}"></div><div class="stat-label">Active tickets</div></div><i class="fa-solid fa-chevron-right stat-hint"></i></a>
+        <a class="card stat-card" th:href="@{/admin/tickets(scope='unassigned')}"><span class="stat-icon"><i class="fa-solid fa-user-clock"></i></span>
+            <div class="stat-body"><div class="stat-value" th:text="${unassignedTickets}"></div><div class="stat-label">Not yet assigned</div></div><i class="fa-solid fa-chevron-right stat-hint"></i></a>
+        <a class="card stat-card" th:href="@{/admin/tickets(status='ESCALATED')}"><span class="stat-icon"><i class="fa-solid fa-triangle-exclamation"></i></span>
+            <div class="stat-body"><div class="stat-value" th:text="${escalatedTickets}"></div><div class="stat-label">Escalated</div></div><i class="fa-solid fa-chevron-right stat-hint"></i></a>
+        <a class="card stat-card" th:href="@{/admin/tickets(scope='old')}"><span class="stat-icon"><i class="fa-solid fa-hourglass-half"></i></span>
+            <div class="stat-body"><div class="stat-value" th:text="${oldTickets}"></div><div class="stat-label">Open for over 3 days</div></div><i class="fa-solid fa-chevron-right stat-hint"></i></a>
+    </div>
+
+    <p class="count-line"><strong th:text="${totalTickets}">0</strong> tickets in total, by status:</p>
+    <div class="chip-row">
+        <a class="chip" th:each="e : ${statusCounts}" th:href="@{/admin/tickets(status=${e.key})}">
+            <span th:text="${#strings.capitalize(#strings.toLowerCase(#strings.replace(e.key, '_', ' ')))}"></span>
+            <span class="chip-count" th:text="${e.value}"></span>
+        </a>
+    </div>
+
+    <div th:unless="${#lists.isEmpty(attention)}">
+        <div class="section-title"><h2>Needs attention</h2></div>
+        <div class="table-wrap"><table>
+            <thead><tr><th>Ref</th><th>Subject</th><th>Category</th><th>Priority</th><th>Status</th><th>Assigned to</th><th>Opened</th><th></th></tr></thead>
+            <tbody><tr th:each="t : ${attention}">
+                <td th:text="${t.ticketRef}"></td><td th:text="${t.subject}"></td><td th:text="${t.category.name}"></td>
+                <td th:text="${#strings.capitalize(#strings.toLowerCase(t.priority.name()))}"></td>
+                <td><span class="badge" th:classappend="'badge-' + ${t.status.name().toLowerCase()}" th:text="${t.status}"></span></td>
+                <td><span th:if="${t.assignedStaff != null}" th:text="${t.assignedStaff.fullName}"></span><span th:unless="${t.assignedStaff != null}" class="unassigned-tag">Unassigned</span></td>
+                <td th:text="${#temporals.format(t.createdAt, 'dd MMM yyyy')}"></td>
+                <td><a th:href="@{/admin/tickets/{id}(id=${t.id})}" class="btn btn-sm btn-outline"><i class="fa-regular fa-eye"></i> Open</a></td>
+            </tr></tbody>
+        </table></div>
     </div>
 
     <div class="section-title"><h2><i class="fa-solid fa-bolt"></i> Quick Actions</h2></div>
     <div class="card-grid">
+        <a class="card" th:href="@{/admin/tickets}"><span class="card-icon"><i class="fa-solid fa-ticket"></i></span> All Tickets</a>
         <a class="card" th:href="@{/admin/users}"><span class="card-icon"><i class="fa-solid fa-users-gear"></i></span> Manage Users &amp; Staff</a>
+        <a class="card" th:href="@{/admin/pools}"><span class="card-icon"><i class="fa-solid fa-people-group"></i></span> Staff Work Pools</a>
         <a class="card" th:href="@{/admin/config}"><span class="card-icon"><i class="fa-solid fa-route"></i></span> Ticket Routing Config</a>
+        <a class="card" th:href="@{/reports/users}"><span class="card-icon"><i class="fa-solid fa-users-viewfinder"></i></span> Users &amp; Member Reports</a>
         <a class="card" th:href="@{/admin/registration-config}"><span class="card-icon"><i class="fa-solid fa-calendar-plus"></i></span> Registration Setup</a>
+        <a class="card" th:href="@{/admin/modules}"><span class="card-icon"><i class="fa-solid fa-layer-group"></i></span> Module Offerings</a>
+        <a class="card" th:href="@{/admin/registrations}"><span class="card-icon"><i class="fa-solid fa-user-check"></i></span> Registration Approvals</a>
         <a class="card" th:href="@{/admin/lost-found}"><span class="card-icon"><i class="fa-solid fa-hand-holding-heart"></i></span> Lost &amp; Found Claims</a>
+        <a class="card" th:href="@{/admin/lost-found/items}"><span class="card-icon"><i class="fa-solid fa-box-open"></i></span> All Lost &amp; Found Reports</a>
         <a class="card" th:href="@{/reports}"><span class="card-icon"><i class="fa-solid fa-chart-line"></i></span> View Reports</a>
         <a class="card" th:href="@{/admin/audit-log}"><span class="card-icon"><i class="fa-solid fa-clock-rotate-left"></i></span> Audit Log</a>
     </div>

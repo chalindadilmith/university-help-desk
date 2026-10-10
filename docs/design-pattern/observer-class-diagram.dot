@@ -1,0 +1,79 @@
+digraph G {
+  graph [rankdir=TB, fontname="DejaVu Sans", nodesep=0.5, ranksep=1.0, pad=0.4, bgcolor="white", splines=spline];
+  node  [shape=plain, fontname="DejaVu Sans", fontsize=11];
+  edge  [fontname="DejaVu Sans", fontsize=10, color="#334155", arrowsize=0.9];
+
+  // ---------- classes (UML boxes) ----------
+  Subject [label=<
+    <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="5" BGCOLOR="#EAF2FF" COLOR="#1E3A8A">
+      <TR><TD><I>&lt;&lt;interface&gt;&gt;</I><BR/><B>TicketSubject</B></TD></TR>
+      <HR/>
+      <TR><TD ALIGN="LEFT">+ addObserver(o: TicketObserver)<BR ALIGN="LEFT"/>+ removeObserver(o: TicketObserver)<BR ALIGN="LEFT"/>+ notifyObservers(e: TicketEvent)<BR ALIGN="LEFT"/></TD></TR>
+    </TABLE>>];
+
+  Observer [label=<
+    <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="5" BGCOLOR="#EAF2FF" COLOR="#1E3A8A">
+      <TR><TD><I>&lt;&lt;interface&gt;&gt;</I><BR/><B>TicketObserver</B></TD></TR>
+      <HR/>
+      <TR><TD ALIGN="LEFT">+ update(e: TicketEvent)<BR ALIGN="LEFT"/></TD></TR>
+    </TABLE>>];
+
+  Concrete [label=<
+    <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="5" BGCOLOR="#FFF7E0" COLOR="#92400E">
+      <TR><TD><B>TicketEventSubject</B><BR/><I>(ConcreteSubject)</I></TD></TR>
+      <HR/>
+      <TR><TD ALIGN="LEFT">- observers: List&lt;TicketObserver&gt;<BR ALIGN="LEFT"/></TD></TR>
+      <HR/>
+      <TR><TD ALIGN="LEFT">+ addObserver(o)<BR ALIGN="LEFT"/>+ removeObserver(o)<BR ALIGN="LEFT"/>+ notifyObservers(e)<BR ALIGN="LEFT"/></TD></TR>
+    </TABLE>>];
+
+  Audit [label=<
+    <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="5" BGCOLOR="#E8F7EE" COLOR="#166534">
+      <TR><TD><B>AuditLog-<BR/>Observer</B><BR/><I>(ConcreteObserver)<BR/>@Order 1</I></TD></TR>
+      <HR/>
+      <TR><TD ALIGN="LEFT">+ update(e)<BR ALIGN="LEFT"/>writes audit row<BR ALIGN="LEFT"/></TD></TR>
+    </TABLE>>];
+
+  Staff [label=<
+    <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="5" BGCOLOR="#E8F7EE" COLOR="#166534">
+      <TR><TD><B>StaffNotification-<BR/>Observer</B><BR/><I>(ConcreteObserver)<BR/>@Order 2</I></TD></TR>
+      <HR/>
+      <TR><TD ALIGN="LEFT">+ update(e)<BR ALIGN="LEFT"/>notifies staff<BR ALIGN="LEFT"/></TD></TR>
+    </TABLE>>];
+
+  Student [label=<
+    <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="5" BGCOLOR="#E8F7EE" COLOR="#166534">
+      <TR><TD><B>StudentNotification-<BR/>Observer</B><BR/><I>(ConcreteObserver)<BR/>@Order 3</I></TD></TR>
+      <HR/>
+      <TR><TD ALIGN="LEFT">+ update(e)<BR ALIGN="LEFT"/>bell + e-mail<BR ALIGN="LEFT"/></TD></TR>
+    </TABLE>>];
+
+  Service [label=<
+    <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="5" BGCOLOR="#F5F0FF" COLOR="#5B21B6">
+      <TR><TD><B>TicketServiceImpl</B><BR/><I>(client of the subject)</I></TD></TR>
+      <HR/>
+      <TR><TD ALIGN="LEFT">- ticketEvents: TicketSubject<BR ALIGN="LEFT"/></TD></TR>
+      <HR/>
+      <TR><TD ALIGN="LEFT">+ createTicket(...)<BR ALIGN="LEFT"/>+ assignToSelf(...)<BR ALIGN="LEFT"/>+ updateStatus(...)<BR ALIGN="LEFT"/>+ escalate / reopen ...<BR ALIGN="LEFT"/></TD></TR>
+    </TABLE>>];
+
+  Event [label=<
+    <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="5" BGCOLOR="#F1F5F9" COLOR="#334155">
+      <TR><TD><B>TicketEvent</B><BR/><I>(record pushed to observers)</I></TD></TR>
+      <HR/>
+      <TR><TD ALIGN="LEFT">type: TicketEventType<BR ALIGN="LEFT"/>ticket: Ticket<BR ALIGN="LEFT"/>actor: User<BR ALIGN="LEFT"/>target: User<BR ALIGN="LEFT"/>newStatus: TicketStatus<BR ALIGN="LEFT"/></TD></TR>
+    </TABLE>>];
+
+  {rank=same; Service; Subject; Observer}
+  {rank=same; Concrete; Audit; Staff; Student}
+
+  Service -> Subject  [arrowhead=vee, label="  uses"];
+  Subject -> Observer [arrowhead=vee, taillabel="1", headlabel="*", label="  notifies", labeldistance=1.8];
+
+  Subject  -> Concrete [dir=back, arrowtail=empty, style=dashed];
+  Observer -> Audit    [dir=back, arrowtail=empty, style=dashed];
+  Observer -> Staff    [dir=back, arrowtail=empty, style=dashed];
+  Observer -> Student  [dir=back, arrowtail=empty, style=dashed];
+
+  Concrete -> Event [arrowhead=vee, style=dotted, label=" pushes"];
+}

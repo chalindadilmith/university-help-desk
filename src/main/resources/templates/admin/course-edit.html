@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:replace="~{fragments/layout :: layout('Edit Module', 'modules', ~{::section})}">
+<section>
+    <h1><i class="fa-solid fa-pen-to-square"></i> Edit Module <span th:text="${course.code}"></span></h1>
+    <div class="card" style="max-width:560px;">
+        <form th:action="@{/admin/modules/courses/{id}(id=${course.id})}" th:object="${courseForm}" method="post">
+            <label for="code">Code</label>
+            <input type="text" id="code" th:field="*{code}"/>
+            <span class="field-error" th:if="${#fields.hasErrors('code')}" th:errors="*{code}"></span>
+
+            <label for="name">Name</label>
+            <input type="text" id="name" th:field="*{name}"/>
+            <span class="field-error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></span>
+
+            <div class="form-row">
+                <div>
+                    <label for="credits">Credits</label>
+                    <input type="number" min="1" max="10" id="credits" th:field="*{credits}"/>
+                    <span class="field-error" th:if="${#fields.hasErrors('credits')}" th:errors="*{credits}"></span>
+                </div>
+                <div>
+                    <label for="yearLevel">Academic Year</label>
+                    <select id="yearLevel" th:field="*{yearLevel}">
+                        <option value="">-- Select --</option>
+                        <option th:each="y : ${#numbers.sequence(1, 4)}" th:value="${y}" th:text="'Year ' + ${y}"></option>
+                    </select>
+                    <span class="field-error" th:if="${#fields.hasErrors('yearLevel')}" th:errors="*{yearLevel}"></span>
+                </div>
+            </div>
+
+            <label for="specialisationId">Specialisation</label>
+            <select id="specialisationId" th:field="*{specialisationId}">
+                <option value="">Common (all specialisations)</option>
+                <option th:each="sp : ${specialisations}" th:value="${sp.id}" th:text="${sp.name}"></option>
+            </select>
+
+            <div class="mt-1">
+                <button type="submit" class="btn"><i class="fa-solid fa-floppy-disk"></i> Save Changes</button>
+                <a class="btn btn-secondary" th:href="@{/admin/modules}">Cancel</a>
+            </div>
+        </form>
+    </div>
+</section>
+</div>
+</body>
+</html>

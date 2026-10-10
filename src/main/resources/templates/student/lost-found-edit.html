@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:replace="~{fragments/layout :: layout('Edit Report', 'lost-found', ~{::section})}">
+<section>
+    <a th:href="@{/student/lost-found/{id}(id=${item.id})}" class="back-link"><i class="fa-solid fa-arrow-left"></i> Back to report</a>
+    <h1 class="mt-1"><i class="fa-solid fa-pen"></i> Edit my report</h1>
+    <div class="card">
+        <form th:action="@{/student/lost-found/{id}/edit(id=${item.id})}" th:object="${reportForm}" method="post" enctype="multipart/form-data">
+            <div class="form-row">
+                <div>
+                    <label for="itemType">Type</label>
+                    <select id="itemType" th:field="*{itemType}">
+                        <option value="LOST">Lost</option>
+                        <option value="FOUND">Found</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="itemDate">Date</label>
+                    <input type="date" id="itemDate" th:field="*{itemDate}"/>
+                    <span class="field-error" th:if="${#fields.hasErrors('itemDate')}" th:errors="*{itemDate}"></span>
+                </div>
+            </div>
+            <label for="description">Description</label>
+            <textarea id="description" th:field="*{description}"></textarea>
+            <span class="field-error" th:if="${#fields.hasErrors('description')}" th:errors="*{description}"></span>
+
+            <label for="location">Location</label>
+            <input type="text" id="location" th:field="*{location}"/>
+            <span class="field-error" th:if="${#fields.hasErrors('location')}" th:errors="*{location}"></span>
+
+            <label for="image">Replace photo (optional - PNG or JPG, max 5 MB)</label>
+            <input type="file" id="image" name="image" accept=".png,.jpg,.jpeg"/>
+            <span class="field-error" th:if="${#fields.hasErrors('image')}" th:errors="*{image}"></span>
+            <p class="muted">Leave empty to keep your current photo. Editing is only possible while the report is active.</p>
+
+            <button type="submit" class="btn"><i class="fa-solid fa-floppy-disk"></i> Save changes</button>
+            <a th:href="@{/student/lost-found/{id}(id=${item.id})}" class="btn btn-outline">Cancel</a>
+        </form>
+    </div>
+</section>
+</div>
+</body>
+</html>

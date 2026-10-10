@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:replace="~{fragments/layout :: layout('All Tickets', 'all-tickets', ~{::section})}">
+<section>
+    <div class="flex-between">
+        <h1><i class="fa-solid fa-list"></i> All Tickets</h1>
+        <a th:href="@{/staff/tickets/new}" class="btn"><i class="fa-solid fa-plus"></i> New Ticket</a>
+    </div>
+    <p class="muted">Every ticket in the system, with who it is assigned to. Staff can view, edit and delete any ticket.</p>
+
+    <div class="alert alert-success" th:if="${success}"><i class="fa-solid fa-circle-check"></i><span th:text="${success}"></span></div>
+    <div class="alert alert-error" th:if="${error}"><i class="fa-solid fa-circle-exclamation"></i><span th:text="${error}"></span></div>
+
+    <p class="count-line"><strong th:text="${totalAll}">0</strong> tickets in total<span th:if="${view.totalItems != totalAll}"> &middot; <strong th:text="${view.totalItems}"></strong> match the filters</span></p>
+    <div class="chip-row">
+        <a class="chip" th:classappend="${statusFilter == null or statusFilter == ''} ? 'active'" th:href="@{/staff/tickets/all}">All <span class="chip-count" th:text="${totalAll}"></span></a>
+        <a class="chip" th:each="e : ${statusCounts}" th:classappend="${statusFilter == e.key} ? 'active'" th:href="@{/staff/tickets/all(status=${e.key})}">
+            <span th:text="${#strings.capitalize(#strings.toLowerCase(#strings.replace(e.key, '_', ' ')))}"></span>
+            <span class="chip-count" th:text="${e.value}"></span>
+        </a>
+    </div>
+
+    <form th:action="@{/staff/tickets/all}" method="get" class="card">
+        <div class="form-row wrap">
+            <div>
+                <label for="q">Search every detail</label>
+                <input type="text" id="q" name="q" th:value="${q}" placeholder="Ref, subject, description, student, staff..."/>
+            </div>
+            <div>
+                <label for="statusFilter">Status</label>
+                <select id="statusFilter" name="status">
+                    <option value="">All statuses</option>
+                    <option th:each="s : ${statuses}" th:value="${s.name()}" th:text="${s}" th:selected="${s.name() == statusFilter}"></option>
+                </select>
+            </div>
+            <div>
+                <label for="priority">Priority</label>
+                <select id="priority" name="priority">
+                    <option value="">Any priority</option>
+                    <option th:each="p : ${priorities}" th:value="${p.name()}"
+                            th:text="${#strings.capitalize(#strings.toLowerCase(p.name()))}" th:selected="${p.name() == priorityFilter}"></option>
+                </select>
+            </div>
+            <div>
+                <label for="categoryId">Category</label>
+                <select id="categoryId" name="categoryId">
+                    <option value="">Any category</option>
+                    <option th:each="c : ${categories}" th:value="${c.id}" th:text="${c.name}" th:selected="${categoryFilter != null and c.id == categoryFilter}"></option>
+                </select>
+            </div>
+            <div>
+                <label for="assignee">Assigned to</label>
+                <select id="assignee" name="assignee">
+                    <option value="">Anyone</option>
+                    <option value="unassigned" th:selected="${assigneeFilter == 'unassigned'}">Unassigned</option>
+                    <option th:each="u : ${staffList}" th:value="${u.id}" th:text="${u.fullName}" th:selected="${assigneeFilter == #strings.toString(u.id)}"></option>
+                </select>
+            </div>
+            <div>
+                <label for="scope">Show</label>
+                <select id="scope" name="scope">
+                    <option value="" th:selected="${scope == null or scope == ''}">Everything</option>
+                    <option value="active" th:selected="${scope == 'active'}">Active only</option>
+                    <option value="unassigned" th:selected="${scope == 'unassigned'}">Active &amp; unassigned</option>
+                    <option value="old" th:selected="${scope == 'old'}">Open over 3 days</option>
+                </select>
+            </div>
+            <div>
+                <label for="sort">Sort by</label>
+                <select id="sort" name="sort">
+                    <option value="" th:selected="${sort == null or sort == ''}">Newest first</option>
+                    <option value="oldest" th:selected="${sort == 'oldest'}">Oldest first</option>
+                    <option value="priority" th:selected="${sort == 'priority'}">Highest priority</option>
+                    <option value="status" th:selected="${sort == 'status'}">Status</option>
+                </select>
+            </div>
+        </div>
+        <div class="actions mt-1">
+            <button type="submit" class="btn"><i class="fa-solid fa-magnifying-glass"></i> Search</button>
+            <a th:href="@{/staff/tickets/all}" class="btn btn-outline">Reset</a>
+        </div>
+    </form>
+
+    <div class="empty-state" th:if="${#lists.isEmpty(tickets)}"><i class="fa-regular fa-folder-open"></i>No tickets match.</div>
+    <div class="table-wrap" th:unless="${#lists.isEmpty(tickets)}">
+    <table>
+        <thead><tr><th>Ref</th><th>Subject</th><th>Category</th><th>Priority</th><th>Status</th><th>Student</th><th>Assigned to</th><th>Created</th><th>Actions</th></tr></thead>
+        <tbody>
+        <tr th:each="t : ${tickets}">
+            <td th:text="${t.ticketRef}"></td>
+            <td th:text="${t.subject}"></td>
+            <td th:text="${t.category.name}"></td>
+            <td th:text="${#strings.capitalize(#strings.toLowerCase(t.priority.name()))}"></td>
+            <td><span class="badge" th:classappend="'badge-' + ${t.status.name().toLowerCase()}" th:text="${t.status}"></span></td>
+            <td><span th:text="${t.student.fullName}"></span><div class="cell-sub" th:text="${t.student.email}"></div></td>
+            <td><span th:if="${t.assignedStaff != null}" th:text="${t.assignedStaff.fullName}"></span><span th:unless="${t.assignedStaff != null}" class="unassigned-tag">Unassigned</span></td>
+            <td th:text="${#temporals.format(t.createdAt, 'dd MMM yyyy')}"></td>
+            <td class="actions">
+                <a th:href="@{/staff/tickets/{id}(id=${t.id})}" class="btn btn-sm btn-outline"><i class="fa-regular fa-eye"></i> View</a>
+                <a th:href="@{/staff/tickets/{id}/edit(id=${t.id})}" class="btn btn-sm btn-outline"><i class="fa-solid fa-pen"></i> Edit</a>
+                <form th:action="@{/staff/tickets/{id}/delete(id=${t.id})}" method="post" style="display:inline;">
+                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirmAction('Delete this ticket permanently? This cannot be undone.')"><i class="fa-solid fa-trash"></i> Delete</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    </div>
+    <div class="pager" th:if="${view.totalPages > 1}">
+        <a th:if="${view.hasPrevious}" class="btn btn-sm btn-outline"
+           th:href="@{/staff/tickets/all(q=${q},status=${statusFilter},priority=${priorityFilter},categoryId=${categoryFilter},assignee=${assigneeFilter},sort=${sort},scope=${scope},page=${view.page - 1})}">Previous</a>
+        <span class="muted" th:text="'Page ' + ${view.page} + ' of ' + ${view.totalPages}"></span>
+        <a th:if="${view.hasNext}" class="btn btn-sm btn-outline"
+           th:href="@{/staff/tickets/all(q=${q},status=${statusFilter},priority=${priorityFilter},categoryId=${categoryFilter},assignee=${assigneeFilter},sort=${sort},scope=${scope},page=${view.page + 1})}">Next</a>
+    </div>
+</section>
+</div>
+</body>
+</html>

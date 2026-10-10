@@ -4,9 +4,10 @@
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <title>Register - University Help Desk</title>
-    <link rel="preconnect" href="https://cdnjs.cloudflare.com"/>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" referrerpolicy="no-referrer"/>
+    <link rel="stylesheet" th:href="@{/vendor/fontawesome/css/all.min.css}"/>
     <link rel="stylesheet" th:href="@{/css/style.css}"/>
+    <link rel="icon" type="image/svg+xml" th:href="@{/images/favicon.svg(v=3)}"/>
+    <link rel="icon" type="image/x-icon" sizes="any" th:href="@{/images/favicon.ico(v=3)}"/>
 </head>
 <body>
 <div class="auth-page">
@@ -75,6 +76,7 @@
 
                     <label for="password"><i class="fa-solid fa-lock"></i> Password</label>
                     <input type="password" id="password" th:field="*{password}"/>
+                    <span class="muted">At least 8 characters, with a letter and a number.</span>
                     <span class="field-error" th:if="${#fields.hasErrors('password')}"><i class="fa-solid fa-circle-exclamation"></i> <span th:errors="*{password}"></span></span>
 
                     <label for="confirmPassword"><i class="fa-solid fa-lock"></i> Confirm Password</label>

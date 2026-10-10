@@ -20,4 +20,12 @@ public interface KbArticleRepository extends JpaRepository<KbArticle, Long> {
     List<KbArticle> search(@Param("status") KbArticleStatus status, @Param("keyword") String keyword);
 
     List<KbArticle> findByStatus(KbArticleStatus status);
+
+    @org.springframework.data.jpa.repository.Modifying(clearAutomatically = true)
+    @Query("UPDATE KbArticle a SET a.helpfulCount = a.helpfulCount + 1 WHERE a.id = :id")
+    int addHelpful(@Param("id") Long id);
+
+    @org.springframework.data.jpa.repository.Modifying(clearAutomatically = true)
+    @Query("UPDATE KbArticle a SET a.notHelpfulCount = a.notHelpfulCount + 1 WHERE a.id = :id")
+    int addNotHelpful(@Param("id") Long id);
 }

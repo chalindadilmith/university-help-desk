@@ -1,5 +1,7 @@
 package com.helpdesk.controller;
 
+import com.helpdesk.entity.Role;
+import com.helpdesk.repository.TicketRepository;
 import com.helpdesk.security.CustomUserDetails;
 import com.helpdesk.service.NotificationService;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -18,9 +20,11 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 public class GlobalModelAttributesAdvice {
 
     private final NotificationService notificationService;
+    private final TicketRepository ticketRepository;
 
-    public GlobalModelAttributesAdvice(NotificationService notificationService) {
+    public GlobalModelAttributesAdvice(NotificationService notificationService, TicketRepository ticketRepository) {
         this.notificationService = notificationService;
+        this.ticketRepository = ticketRepository;
     }
 
     @ModelAttribute
@@ -29,6 +33,11 @@ public class GlobalModelAttributesAdvice {
             Long userId = principal.getUser().getId();
             model.addAttribute("unreadNotifCount", notificationService.unreadCount(userId));
             model.addAttribute("recentNotifications", notificationService.recentForUser(userId));
+            Role role = principal.getUser().getRole();
+            if (role == Role.STAFF || role == Role.ADMIN) {
+                // amount of tickets, shown as a badge next to the ticket links in the sidebar
+                model.addAttribute("ticketTotal", ticketRepository.count());
+            }
         }
     }
 }

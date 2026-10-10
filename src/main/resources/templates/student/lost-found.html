@@ -4,11 +4,13 @@
 <div th:replace="~{fragments/layout :: layout('Lost &amp; Found', 'lost-found', ~{::section})}">
 <section>
     <h1><i class="fa-solid fa-magnifying-glass-location"></i> Lost &amp; Found</h1>
+    <p><a th:href="@{/student/lost-found/mine}" class="btn btn-sm btn-outline"><i class="fa-solid fa-list-check"></i> My reports &amp; claims</a></p>
     <div class="alert alert-success" th:if="${param.reported}"><i class="fa-solid fa-circle-check"></i>Your report has been posted.</div>
+    <div class="alert alert-success" th:if="${success}"><i class="fa-solid fa-circle-check"></i><span th:text="${success}"></span></div>
 
     <div class="card">
         <h2><i class="fa-solid fa-circle-plus"></i> Report an Item</h2>
-        <form th:action="@{/student/lost-found/report}" th:object="${reportForm}" method="post">
+        <form th:action="@{/student/lost-found/report}" th:object="${reportForm}" method="post" enctype="multipart/form-data">
             <div class="form-row">
                 <div>
                     <label for="itemType">Type</label>
@@ -30,6 +32,11 @@
             <label for="location">Location</label>
             <input type="text" id="location" th:field="*{location}" placeholder="e.g. Library, 2nd floor"/>
             <span class="field-error" th:if="${#fields.hasErrors('location')}" th:errors="*{location}"></span>
+
+            <label for="image">Photo of the item (required - PNG or JPG, max 5 MB)</label>
+            <input type="file" id="image" name="image" accept=".png,.jpg,.jpeg" required="required"/>
+            <span class="field-error" th:if="${#fields.hasErrors('image')}" th:errors="*{image}"></span>
+            <p class="muted"><i class="fa-solid fa-lock"></i> Your photo is only seen by you and the admins. It is used to verify who really owns the item.</p>
 
             <button type="submit" class="btn"><i class="fa-solid fa-paper-plane"></i> Submit Report</button>
         </form>

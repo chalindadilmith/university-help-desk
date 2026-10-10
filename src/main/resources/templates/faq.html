@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title th:text="'FAQs - ' + ${universityName} + ' Help Desk'">University Help Desk</title>
+<link rel="stylesheet" th:href="@{/css/home.css(v=7)}"/>
+<link rel="icon" type="image/svg+xml" th:href="@{/images/favicon.svg(v=3)}"/>
+<link rel="icon" type="image/x-icon" sizes="any" th:href="@{/images/favicon.ico(v=3)}"/>
+</head>
+<body>
+<a class="skip" href="#main">Skip to main content</a>
+<header>
+  <div class="wrap nav">
+    <a class="brand" th:href="@{/}" th:text="${universityName} + ' Help Desk'">University Help Desk</a>
+    <nav class="nav-links" aria-label="Main">
+      <a th:href="@{/#services}">Services</a>
+      <a th:href="@{/#how}">How it works</a>
+      <a th:href="@{/faq}">FAQs</a>
+      <a th:href="@{/#contact}">Contact</a>
+    </nav>
+    <div class="nav-actions">
+      <a class="btn btn-onDark" th:href="@{/register}">Register</a>
+      <a class="btn btn-primary" th:href="@{/login}">Log in</a>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+  <section style="padding-top:36px">
+    <div class="wrap">
+      <div class="head"><h1 style="margin:0 0 4px;font-size:1.6rem">Frequently asked questions</h1>
+        <p>Can't find your answer? <a th:href="@{/login}">Log in</a> to raise a support ticket.</p></div>
+      <form class="search" th:action="@{/faq}" method="get" role="search">
+        <label for="keyword" class="skip">Search questions</label>
+        <input type="search" id="keyword" name="keyword" th:value="${keyword}" placeholder="Search questions, e.g. password" maxlength="100"/>
+        <button class="btn btn-primary" type="submit">Search</button>
+        <a class="btn btn-outline" th:if="${keyword != null and !keyword.isBlank()}" th:href="@{/faq}">Clear</a>
+      </form>
+      <div class="empty" th:if="${#lists.isEmpty(articles)}">No questions match your search.</div>
+      <details class="q" th:each="a : ${articles}" th:id="'article-' + ${a.id}">
+        <summary><strong th:text="${a.title}"></strong><span th:text="${a.category.name}"></span></summary>
+        <div class="answer" th:text="${a.content}"></div>
+      </details>
+    </div>
+  </section>
+  <div class="contact" id="contact">
+    <div class="wrap">
+      <div><h3>Visit</h3><p><span th:text="${contactLocation}"></span><br/><span th:text="${contactHours}"></span></p></div>
+      <div><h3>Email</h3><p><a th:href="'mailto:' + ${contactEmail}" th:text="${contactEmail}"></a></p></div>
+      <div><h3>Telephone</h3><p th:text="${contactPhone}"></p></div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap foot">
+    <span>&copy; <span th:text="${#temporals.year(#temporals.createNow())}">2026</span> <span th:text="${universityName}"></span></span>
+    <span>Help Desk portal</span>
+  </div>
+</footer>
+</body>
+</html>

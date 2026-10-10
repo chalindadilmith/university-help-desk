@@ -9,43 +9,178 @@
 
     <div class="empty-state" th:if="${#lists.isEmpty(openSemesters)}"><i class="fa-regular fa-calendar-xmark"></i>Registration isn't open for any semester right now. Check back later.</div>
 
-    <div th:unless="${#lists.isEmpty(openSemesters)}" class="card">
-        <h2><i class="fa-solid fa-clipboard-list"></i> <span th:text="'Register for ' + ${selectedSemester.name}"></span></h2>
+    <th:block th:unless="${#lists.isEmpty(openSemesters)}">
 
-        <div th:if="${existingRegistration != null}" class="alert alert-info">
-            <i class="fa-solid fa-circle-info"></i>
-            <span>You're already registered for this semester (status: <strong th:text="${existingRegistration.status}"></strong>).
-            Submitting again below will replace your course selection.</span>
+        <!-- Semester picker (only when more than one semester is open) -->
+        <div class="chip-row" th:if="${#lists.size(openSemesters) > 1}">
+            <a th:each="s : ${openSemesters}" class="chip" th:classappend="${s.id == selectedSemester.id} ? 'active'"
+               th:href="@{/student/registration(semesterId=${s.id})}" th:text="${s.name}"></a>
         </div>
 
-        <form th:action="@{/student/registration}" method="post">
-            <input type="hidden" name="semesterId" th:value="${selectedSemester.id}"/>
-            <div class="empty-state" th:if="${#lists.isEmpty(offerings)}"><i class="fa-regular fa-folder-open"></i>No courses have been offered for this semester yet.</div>
-            <div th:each="o : ${offerings}" style="margin-bottom:0.5rem;">
-                <label style="display:flex; align-items:center; gap:0.5rem; font-weight:normal;">
-                    <input type="checkbox" name="offeringIds" th:value="${o.id}" style="width:auto;"
-                           th:checked="${existingRegistration != null and existingRegistration.courseOfferings.contains(o)}"/>
-                    <span th:text="${o.course.code} + ' - ' + ${o.course.name} + ' (' + ${o.course.credits} + ' credits)'"></span>
-                    <span class="muted" th:if="${o.scheduleInfo}" th:text="' &middot; ' + ${o.scheduleInfo}"></span>
-                </label>
+        <!-- 1. Eligibility check -->
+        <div class="card">
+            <h2><i class="fa-solid fa-user-check"></i> <span th:text="'Eligibility for ' + ${selectedSemester.name}"></span></h2>
+            <ul class="check-list">
+                <li th:each="c : ${eligibility.checks}" th:classappend="${c.passed} ? 'pass' : 'fail'">
+                    <i class="fa-solid" th:classappend="${c.passed} ? 'fa-circle-check' : 'fa-circle-xmark'"></i>
+                    <div><strong th:text="${c.label}"></strong><div class="muted" th:text="${c.detail}"></div></div>
+                </li>
+            </ul>
+            <div class="alert alert-success mt-1" th:if="${eligibility.eligible}"><i class="fa-solid fa-circle-check"></i><span>You are eligible to register. Complete the form below.</span></div>
+            <div class="alert alert-error mt-1" th:unless="${eligibility.eligible}"><i class="fa-solid fa-ban"></i><span>You can't register for this semester right now. See the failed check above.</span></div>
+        </div>
+
+        <!-- Current registration status for this semester -->
+        <div class="card mt-1" th:if="${existingRegistration != null}">
+            <h2><i class="fa-solid fa-file-circle-check"></i> Your Registration</h2>
+            <div class="detail-grid">
+                <div><span class="muted">Registration No.</span><strong th:text="${existingRegistration.referenceNo}"></strong></div>
+                <div><span class="muted">Status</span><span class="badge" th:classappend="'badge-' + ${existingRegistration.status.name().toLowerCase()}" th:text="${existingRegistration.status}"></span></div>
+                <div><span class="muted">Total credits</span><strong th:text="${existingRegistration.totalCredits}"></strong></div>
+                <div><span class="muted">Submitted</span><span th:text="${#temporals.format(existingRegistration.createdAt, 'dd MMM yyyy, HH:mm')}"></span></div>
             </div>
-            <button type="submit" class="btn mt-1" th:unless="${#lists.isEmpty(offerings)}"><i class="fa-solid fa-check"></i> Confirm Registration</button>
-        </form>
-        <p class="muted mt-1">Maximum 18 credits per semester. There is no payment step in this system.</p>
-    </div>
+            <div class="alert alert-info mt-1" th:if="${existingRegistration.adminRemarks}"><i class="fa-solid fa-comment"></i><span><strong>Admin remarks:</strong> <span th:text="${existingRegistration.adminRemarks}"></span></span></div>
+            <form th:if="${existingRegistration.status.name() == 'PENDING'}" th:action="@{/student/registration/{id}/cancel(id=${existingRegistration.id})}" method="post" class="mt-1">
+                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirmAction('Cancel this pending registration?')"><i class="fa-solid fa-xmark"></i> Cancel Registration</button>
+            </form>
+        </div>
+
+        <!-- 2. Registration form -->
+        <div class="card mt-1" th:if="${eligibility.eligible}">
+            <h2><i class="fa-solid fa-clipboard-list"></i> <span th:text="'Registration Form - ' + ${selectedSemester.name}"></span></h2>
+
+            <form th:action="@{/student/registration}" th:object="${registrationForm}" method="post" id="registrationForm">
+                <input type="hidden" th:field="*{semesterId}"/>
+
+                <h3 class="form-section"><i class="fa-solid fa-id-card"></i> Student Details</h3>
+                <div class="form-row">
+                    <div><label>Full Name</label><input type="text" th:value="${student.fullName}" disabled="disabled"/></div>
+                    <div><label>Student ID</label><input type="text" th:value="${student.studentCode}" disabled="disabled"/></div>
+                </div>
+                <div class="form-row">
+                    <div><label>University Reg. No.</label><input type="text" th:value="${student.universityId}" disabled="disabled"/></div>
+                    <div><label>Email</label><input type="text" th:value="${student.email}" disabled="disabled"/></div>
+                </div>
+                <div class="form-row">
+                    <div>
+                        <label for="contactNumber">Contact Number *</label>
+                        <input type="tel" id="contactNumber" th:field="*{contactNumber}" placeholder="0771234567"/>
+                        <span class="field-error" th:if="${#fields.hasErrors('contactNumber')}" th:errors="*{contactNumber}"></span>
+                    </div>
+                    <div></div>
+                </div>
+
+                <h3 class="form-section"><i class="fa-solid fa-graduation-cap"></i> Academic Details</h3>
+                <label for="specialisationId">Degree Specialisation *</label>
+                <select id="specialisationId" th:field="*{specialisationId}">
+                    <option value="">-- Select your specialisation --</option>
+                    <option th:each="sp : ${specialisations}" th:value="${sp.id}" th:text="${sp.name} + ' (' + ${sp.code} + ')'"></option>
+                </select>
+                <span class="field-error" th:if="${#fields.hasErrors('specialisationId')}" th:errors="*{specialisationId}"></span>
+
+                <div class="form-row">
+                    <div>
+                        <label for="academicYear">Academic Year *</label>
+                        <select id="academicYear" th:field="*{academicYear}">
+                            <option value="">-- Select --</option>
+                            <option th:each="y : ${#numbers.sequence(1, 4)}" th:value="${y}" th:text="'Year ' + ${y}"></option>
+                        </select>
+                        <span class="field-error" th:if="${#fields.hasErrors('academicYear')}" th:errors="*{academicYear}"></span>
+                    </div>
+                    <div>
+                        <label for="semesterOfStudy">Semester of Study *</label>
+                        <select id="semesterOfStudy" th:field="*{semesterOfStudy}">
+                            <option value="">-- Select --</option>
+                            <option value="1">Semester 1</option>
+                            <option value="2">Semester 2</option>
+                        </select>
+                        <span class="field-error" th:if="${#fields.hasErrors('semesterOfStudy')}" th:errors="*{semesterOfStudy}"></span>
+                    </div>
+                </div>
+
+                <h3 class="form-section"><i class="fa-solid fa-book"></i> Modules</h3>
+                <p class="muted" id="moduleHint">Select your specialisation and academic year to see the modules you are eligible for.</p>
+                <span class="field-error" th:if="${#fields.hasErrors('offeringIds')}" th:errors="*{offeringIds}"></span>
+                <table class="module-table">
+                    <thead><tr><th></th><th>Module</th><th>Year</th><th>Specialisation</th><th>Credits</th><th>Seats</th><th>Schedule</th></tr></thead>
+                    <tbody>
+                    <tr th:each="o : ${offerings}" class="module-row"
+                        th:with="taken=${seatsTaken.get(o.id)}, mine=${existingRegistration != null and existingRegistration.courseOfferings.contains(o)}, full=${taken >= o.capacity and !mine}"
+                        th:attr="data-spec=${o.course.specialisation != null ? o.course.specialisation.id : ''},data-year=${o.course.yearLevel != null ? o.course.yearLevel : ''},data-credits=${o.course.credits},data-full=${full}">
+                        <td><input type="checkbox" th:field="*{offeringIds}" th:value="${o.id}" class="module-check" th:disabled="${full}" style="width:auto;"/></td>
+                        <td><strong th:text="${o.course.code}"></strong> <span th:text="${o.course.name}"></span></td>
+                        <td th:text="${o.course.yearLevel != null} ? 'Year ' + ${o.course.yearLevel} : 'Any'"></td>
+                        <td th:text="${o.course.specialisation != null} ? ${o.course.specialisation.code} : 'Common'"></td>
+                        <td th:text="${o.course.credits}"></td>
+                        <td><span th:text="${o.capacity - taken} + ' / ' + ${o.capacity}"></span> <span class="badge badge-rejected" th:if="${full}">Full</span></td>
+                        <td class="muted" th:text="${o.scheduleInfo}"></td>
+                    </tr>
+                    </tbody>
+                </table>
+                <p class="credit-total">Total selected: <strong id="creditTotal">0</strong> / <span th:text="${maxCredits}"></span> credits</p>
+
+                <label class="declaration">
+                    <input type="checkbox" th:field="*{declaration}" style="width:auto;"/>
+                    I confirm that the details above are correct and I meet the requirements for the selected modules.
+                </label>
+                <span class="field-error" th:if="${#fields.hasErrors('declaration')}" th:errors="*{declaration}"></span>
+
+                <button type="submit" class="btn mt-1"><i class="fa-solid fa-paper-plane"></i> Submit for Approval</button>
+                <p class="muted mt-1">Your registration is confirmed only after an admin approves it. There is no payment step in this system.</p>
+            </form>
+        </div>
+    </th:block>
 
     <div class="section-title"><h2><i class="fa-solid fa-clock-rotate-left"></i> My Registration History</h2></div>
-    <div class="empty-state" th:if="${#lists.isEmpty(myRegistrations)}"><i class="fa-regular fa-folder-open"></i>No past registrations.</div>
+    <div class="empty-state" th:if="${#lists.isEmpty(myRegistrations)}"><i class="fa-regular fa-folder-open"></i>No registrations yet.</div>
     <table th:unless="${#lists.isEmpty(myRegistrations)}">
-        <thead><tr><th>Semester</th><th>Status</th><th>Courses</th></tr></thead>
+        <thead><tr><th>Reg. No.</th><th>Semester</th><th>Specialisation</th><th>Modules</th><th>Credits</th><th>Status</th><th>Remarks</th></tr></thead>
         <tbody>
         <tr th:each="r : ${myRegistrations}">
+            <td th:text="${r.referenceNo}"></td>
             <td th:text="${r.semester.name}"></td>
-            <td><span class="badge" th:classappend="'badge-' + ${r.status.name().toLowerCase()}" th:text="${r.status}"></span></td>
+            <td th:text="${r.specialisation != null} ? ${r.specialisation.name} : '-'"></td>
             <td><span th:each="off, iter : ${r.courseOfferings}" th:text="${off.course.code} + (${iter.last} ? '' : ', ')"></span></td>
+            <td th:text="${r.totalCredits}"></td>
+            <td><span class="badge" th:classappend="'badge-' + ${r.status.name().toLowerCase()}" th:text="${r.status}"></span></td>
+            <td class="muted" th:text="${r.adminRemarks}"></td>
         </tr>
         </tbody>
     </table>
+
+    <script>
+        (function () {
+            var form = document.getElementById('registrationForm');
+            if (!form) return;
+            var spec = document.getElementById('specialisationId');
+            var year = document.getElementById('academicYear');
+            var hint = document.getElementById('moduleHint');
+            var total = document.getElementById('creditTotal');
+            var rows = form.querySelectorAll('.module-row');
+
+            function refresh() {
+                var s = spec.value, y = year.value, visible = 0, credits = 0;
+                rows.forEach(function (row) {
+                    var box = row.querySelector('.module-check');
+                    var ok = (!row.dataset.spec || row.dataset.spec === s) && (!row.dataset.year || row.dataset.year === y);
+                    var ready = s && y;
+                    row.style.display = (ready && ok) ? '' : 'none';
+                    if (!(ready && ok)) box.checked = false;
+                    if (ready && ok) visible++;
+                    if (box.checked) credits += parseInt(row.dataset.credits, 10) || 0;
+                });
+                total.textContent = credits;
+                total.parentElement.classList.toggle('over', credits > 18);
+                hint.textContent = !(s && y)
+                    ? 'Select your specialisation and academic year to see the modules you are eligible for.'
+                    : (visible ? visible + ' module(s) available for your specialisation and year.' : 'No modules are offered for your specialisation and year this semester.');
+            }
+            spec.addEventListener('change', refresh);
+            year.addEventListener('change', refresh);
+            rows.forEach(function (row) { row.querySelector('.module-check').addEventListener('change', refresh); });
+            refresh();
+        })();
+    </script>
 </section>
 </div>
 </body>

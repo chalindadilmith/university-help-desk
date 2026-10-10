@@ -4,31 +4,82 @@
 <div th:replace="~{fragments/layout :: layout('Ticket ' + ${ticket.ticketRef}, 'tickets', ~{::section})}">
 <section>
     <a th:href="@{/staff/tickets}" class="back-link"><i class="fa-solid fa-arrow-left"></i> Back to Queue</a>
+     <a th:href="@{/staff/tickets/all}" class="back-link"><i class="fa-solid fa-list"></i> All Tickets</a>
     <div class="flex-between mt-1">
         <h1><i class="fa-solid fa-ticket"></i> <span th:text="${ticket.subject}"></span></h1>
         <span class="badge" th:classappend="'badge-' + ${ticket.status.name().toLowerCase()}" th:text="${ticket.status}"></span>
     </div>
     <p class="muted" th:text="${ticket.ticketRef} + ' &middot; ' + ${ticket.category.name} + ' &middot; Student: ' + ${ticket.student.fullName}"></p>
+    <p class="muted">
+        <i class="fa-solid fa-headset"></i> Assigned to:
+        <strong th:if="${ticket.assignedStaff != null}" th:text="${ticket.assignedStaff.fullName}"></strong>
+        <span th:unless="${ticket.assignedStaff != null}" class="unassigned-tag">Unassigned</span>
+        &middot; Student: <span th:text="${ticket.student.email}"></span>
+    </p>
+    <div class="actions">
+        <a th:href="@{/staff/tickets/{id}/edit(id=${ticket.id})}" class="btn btn-sm btn-outline"><i class="fa-solid fa-pen"></i> Edit Ticket</a>
+        <form th:action="@{/staff/tickets/{id}/delete(id=${ticket.id})}" method="post" style="display:inline;">
+            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirmAction('Delete this ticket permanently? This removes its replies and attachments and cannot be undone.')"><i class="fa-solid fa-trash"></i> Delete Ticket</button>
+        </form>
+    </div>
+
+    <div class="alert alert-success" th:if="${success}"><i class="fa-solid fa-circle-check"></i><span th:text="${success}"></span></div>
+    <div class="alert alert-error" th:if="${error}"><i class="fa-solid fa-circle-exclamation"></i><span th:text="${error}"></span></div>
 
     <div class="card">
         <p th:text="${ticket.description}"></p>
+        <p class="muted" th:if="${ticket.assignedStaff != null and !mine}"><i class="fa-solid fa-headset"></i> Handled by <span th:text="${ticket.assignedStaff.fullName}"></span></p>
+        <p class="muted">Priority: <strong th:text="${#strings.capitalize(#strings.toLowerCase(ticket.priority.name()))}"></strong></p>
+        <div th:unless="${#lists.isEmpty(attachments)}">
+            <strong>Attachments</strong>
+            <ul>
+                <li th:each="a : ${attachments}">
+                    <a th:href="@{/staff/tickets/{id}/attachments/{aid}(id=${ticket.id},aid=${a.id})}" target="_blank" rel="noopener"
+                       th:text="${a.fileName}"></a>
+                </li>
+            </ul>
+        </div>
     </div>
 
-    <div class="card flex-between">
-        <form th:if="${ticket.assignedStaff == null}" th:action="@{/staff/tickets/{id}/assign(id=${ticket.id})}" method="post">
+    <!-- not yet taken: any pool member can take it -->
+    <div class="card" th:if="${canTake}">
+        <form th:action="@{/staff/tickets/{id}/assign(id=${ticket.id})}" method="post">
+            <p class="muted">Nobody is handling this ticket yet. Take it to reply, change its status or escalate it.</p>
             <button type="submit" class="btn"><i class="fa-solid fa-hand"></i> Assign to Me</button>
         </form>
-        <form th:action="@{/staff/tickets/{id}/status(id=${ticket.id})}" method="post">
-            <select name="status" onchange="this.form.submit()">
-                <option value="">-- change status --</option>
-                <option value="IN_PROGRESS">In Progress</option>
-                <option value="RESOLVED">Resolved</option>
-                <option value="CLOSED">Closed</option>
+    </div>
+
+    <!-- only the assigned staff member sees the controls -->
+    <div class="card flex-between" th:if="${mine and (!#lists.isEmpty(nextStatuses) or canEscalate)}">
+        <form th:if="${!#lists.isEmpty(nextStatuses)}" th:action="@{/staff/tickets/{id}/status(id=${ticket.id})}" method="post">
+            <label for="statusSelect" class="muted">Change status</label>
+            <select id="statusSelect" name="status" onchange="this.form.submit()">
+                <option value="">-- choose --</option>
+                <option th:each="s : ${nextStatuses}" th:value="${s.name()}"
+                        th:text="${#strings.capitalize(#strings.toLowerCase(#strings.replace(s.name(), '_', ' ')))}"></option>
             </select>
         </form>
-        <form th:action="@{/staff/tickets/{id}/escalate(id=${ticket.id})}" method="post">
+        <form th:if="${canEscalate}" th:action="@{/staff/tickets/{id}/escalate(id=${ticket.id})}" method="post">
             <button type="submit" class="btn btn-secondary" onclick="return confirmAction('Escalate this ticket to senior staff?')"><i class="fa-solid fa-triangle-exclamation"></i> Escalate</button>
         </form>
+    </div>
+
+    <!-- hand the ticket on: back to the queue, or to a colleague in the same pool -->
+    <div class="card" th:if="${canRelease}">
+        <div class="form-row" style="align-items:flex-end;">
+            <form th:action="@{/staff/tickets/{id}/transfer(id=${ticket.id})}" method="post" th:if="${!#lists.isEmpty(workload)}">
+                <label for="targetStaffId">Transfer to a colleague</label>
+                <select id="targetStaffId" name="targetStaffId" required="required">
+                    <option value="">-- choose --</option>
+                    <option th:each="w : ${workload}" th:value="${w.staff().id}"
+                            th:text="${w.staff().fullName + ' (' + w.active() + ' open)'}"></option>
+                </select>
+                <button type="submit" class="btn btn-secondary mt-1" onclick="return confirmAction('Transfer this ticket?')"><i class="fa-solid fa-right-left"></i> Transfer</button>
+            </form>
+            <form th:action="@{/staff/tickets/{id}/release(id=${ticket.id})}" method="post">
+                <button type="submit" class="btn btn-outline" onclick="return confirmAction('Put this ticket back in the queue?')"><i class="fa-solid fa-rotate-left"></i> Release to queue</button>
+            </form>
+        </div>
     </div>
 
     <div class="section-title"><h2><i class="fa-solid fa-comments"></i> Activity</h2></div>
@@ -38,15 +89,25 @@
             <strong th:text="${c.author.fullName}"></strong>
             <span class="muted" th:text="${' - ' + #temporals.format(c.createdAt, 'dd MMM, HH:mm')}"></span>
             <span th:if="${c.resolutionNote}" class="badge badge-resolved">Resolution</span>
+            <span th:if="${c.internal}" class="badge badge-escalated">Internal note</span>
             <p th:text="${c.comment}"></p>
         </div>
 
-        <form th:action="@{/staff/tickets/{id}/comment(id=${ticket.id})}" method="post" class="mt-1">
+        <form th:if="${mine and ticket.status.name() != 'CLOSED'}" th:action="@{/staff/tickets/{id}/comment(id=${ticket.id})}" method="post" class="mt-1">
+            <label for="cannedSelect">Quick reply</label>
+            <select id="cannedSelect" onchange="if (this.value) { document.getElementById('comment').value = this.value; this.selectedIndex = 0; }">
+                <option value="">-- insert a ready-made reply --</option>
+                <option th:each="c : ${cannedReplies}" th:value="${c}" th:text="${#strings.abbreviate(c, 70)}"></option>
+            </select>
             <label for="comment">Add a reply</label>
-            <textarea id="comment" name="comment" required="required"></textarea>
+            <textarea id="comment" name="comment" required="required" maxlength="2000"></textarea>
             <label><input type="checkbox" name="resolutionNote" value="true" style="width:auto; display:inline-block;"/> Mark as resolution note</label>
+            <label><input type="checkbox" name="internal" value="true" style="width:auto; display:inline-block;"/> Internal note (the student will not see it)</label>
             <button type="submit" class="btn mt-1"><i class="fa-solid fa-paper-plane"></i> Send Reply</button>
         </form>
+        <p class="muted mt-1" th:if="${!mine and canTake}">Assign the ticket to yourself to reply.</p>
+        <p class="muted mt-1" th:if="${!mine and !canTake}">You are viewing this ticket read-only. Only the assigned staff member can reply or change its status.</p>
+        <p class="muted mt-1" th:if="${ticket.status.name() == 'CLOSED'}">This ticket is closed.</p>
     </div>
 </section>
 </div>

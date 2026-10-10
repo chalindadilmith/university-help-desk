@@ -4,7 +4,9 @@
 <div th:replace="~{fragments/layout :: layout('Registration Setup', 'registration-config', ~{::section})}">
 <section>
     <h1><i class="fa-solid fa-calendar-plus"></i> Semester Registration Setup</h1>
+    <div class="alert alert-success" th:if="${success}"><i class="fa-solid fa-circle-check"></i><span th:text="${success}"></span></div>
     <div class="alert alert-error" th:if="${error}"><i class="fa-solid fa-circle-exclamation"></i><span th:text="${error}"></span></div>
+    <p class="muted">Modules and the modules offered in each semester are managed on the <a th:href="@{/admin/modules}">Module Offerings</a> page. Submitted registrations are reviewed under <a th:href="@{/admin/registrations}">Registration Approvals</a>.</p>
 
     <div class="card-grid" style="grid-template-columns: 1fr 1fr;">
         <div class="card">
@@ -20,70 +22,49 @@
                 <button type="submit" class="btn btn-sm mt-1"><i class="fa-solid fa-plus"></i> Add Semester</button>
             </form>
             <table class="mt-1">
-                <thead><tr><th>Name</th><th>Open?</th></tr></thead>
+                <thead><tr><th>Name</th><th>Dates</th><th>Registration</th><th></th></tr></thead>
                 <tbody>
                 <tr th:each="s : ${semesters}">
                     <td th:text="${s.name}"></td>
-                    <td th:text="${s.registrationOpen} ? 'Yes' : 'No'"></td>
+                    <td class="muted" th:text="${#temporals.format(s.startDate, 'dd MMM yy')} + ' - ' + ${#temporals.format(s.endDate, 'dd MMM yy')}"></td>
+                    <td><span class="badge" th:classappend="${s.registrationOpen} ? 'badge-open' : 'badge-closed'" th:text="${s.registrationOpen} ? 'Open' : 'Closed'"></span></td>
+                    <td>
+                        <form th:action="@{/admin/registration-config/semesters/{id}/toggle(id=${s.id})}" method="post" style="display:inline;">
+                            <button type="submit" class="btn btn-sm btn-outline" th:text="${s.registrationOpen} ? 'Close' : 'Open'"></button>
+                        </form>
+                    </td>
                 </tr>
                 </tbody>
             </table>
         </div>
 
         <div class="card">
-            <h2><i class="fa-solid fa-book"></i> Courses</h2>
-            <form th:action="@{/admin/registration-config/courses}" th:object="${courseForm}" method="post">
-                <label for="courseCode">Code</label>
-                <input type="text" id="courseCode" th:field="*{code}" placeholder="e.g. SE2030"/>
-                <label for="courseName">Name</label>
-                <input type="text" id="courseName" th:field="*{name}"/>
-                <label for="credits">Credits</label>
-                <input type="number" id="credits" th:field="*{credits}"/>
-                <button type="submit" class="btn btn-sm"><i class="fa-solid fa-plus"></i> Add Course</button>
+            <h2><i class="fa-solid fa-graduation-cap"></i> Degree Specialisations</h2>
+            <form th:action="@{/admin/registration-config/specialisations}" th:object="${specialisationForm}" method="post">
+                <div class="form-row">
+                    <div><label for="specCode">Code</label><input type="text" id="specCode" th:field="*{code}" placeholder="e.g. SE"/></div>
+                    <div><label for="specName">Name</label><input type="text" id="specName" th:field="*{name}" placeholder="e.g. Software Engineering"/></div>
+                </div>
+                <label for="specDesc">Description (optional)</label>
+                <input type="text" id="specDesc" th:field="*{description}"/>
+                <button type="submit" class="btn btn-sm"><i class="fa-solid fa-plus"></i> Add Specialisation</button>
             </form>
             <table class="mt-1">
-                <thead><tr><th>Code</th><th>Name</th><th>Credits</th></tr></thead>
+                <thead><tr><th>Code</th><th>Name</th><th>Status</th><th></th></tr></thead>
                 <tbody>
-                <tr th:each="c : ${courses}">
-                    <td th:text="${c.code}"></td>
-                    <td th:text="${c.name}"></td>
-                    <td th:text="${c.credits}"></td>
+                <tr th:each="sp : ${specialisations}">
+                    <td th:text="${sp.code}"></td>
+                    <td th:text="${sp.name}"></td>
+                    <td><span class="badge" th:classappend="${sp.active} ? 'badge-active' : 'badge-closed'" th:text="${sp.active} ? 'Active' : 'Hidden'"></span></td>
+                    <td>
+                        <form th:action="@{/admin/registration-config/specialisations/{id}/toggle(id=${sp.id})}" method="post" style="display:inline;">
+                            <button type="submit" class="btn btn-sm btn-outline" th:text="${sp.active} ? 'Hide' : 'Show'"></button>
+                        </form>
+                    </td>
                 </tr>
                 </tbody>
             </table>
         </div>
-    </div>
-
-    <div class="section-title"><h2><i class="fa-solid fa-layer-group"></i> Course Offerings (for the most recent semester)</h2></div>
-    <div class="card">
-        <form th:action="@{/admin/registration-config/offerings}" th:object="${offeringForm}" method="post" class="form-row" style="align-items:flex-end;">
-            <div>
-                <label for="offSemester">Semester</label>
-                <select id="offSemester" th:field="*{semesterId}">
-                    <option th:each="s : ${semesters}" th:value="${s.id}" th:text="${s.name}"></option>
-                </select>
-            </div>
-            <div>
-                <label for="offCourse">Course</label>
-                <select id="offCourse" th:field="*{courseId}">
-                    <option th:each="c : ${courses}" th:value="${c.id}" th:text="${c.code}"></option>
-                </select>
-            </div>
-            <div><label for="capacity">Capacity</label><input type="number" id="capacity" th:field="*{capacity}"/></div>
-            <div><label for="scheduleInfo">Schedule (free text)</label><input type="text" id="scheduleInfo" th:field="*{scheduleInfo}" placeholder="e.g. Mon/Wed 9-11am"/></div>
-            <div><button type="submit" class="btn"><i class="fa-solid fa-plus"></i> Add Offering</button></div>
-        </form>
-
-        <table class="mt-1">
-            <thead><tr><th>Course</th><th>Capacity</th><th>Schedule</th></tr></thead>
-            <tbody>
-            <tr th:each="o : ${offerings}">
-                <td th:text="${o.course.code} + ' - ' + ${o.course.name}"></td>
-                <td th:text="${o.capacity}"></td>
-                <td th:text="${o.scheduleInfo}"></td>
-            </tr>
-            </tbody>
-        </table>
     </div>
 </section>
 </div>

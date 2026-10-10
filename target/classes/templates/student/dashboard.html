@@ -6,27 +6,30 @@
     <h1><i class="fa-solid fa-gauge-high"></i> Welcome back, <span sec:authentication="name">Student</span></h1>
 
     <div class="card-grid">
-        <div class="card stat-card">
+        <a class="card stat-card" th:href="@{/student/tickets}">
             <span class="stat-icon"><i class="fa-solid fa-ticket"></i></span>
             <div class="stat-body">
                 <div class="stat-value" th:text="${totalTickets}"></div>
                 <div class="stat-label">Total Tickets Raised</div>
             </div>
-        </div>
-        <div class="card stat-card">
+            <i class="fa-solid fa-chevron-right stat-hint"></i>
+        </a>
+        <a class="card stat-card" th:href="@{/student/tickets(scope='active')}">
             <span class="stat-icon"><i class="fa-solid fa-hourglass-half"></i></span>
             <div class="stat-body">
                 <div class="stat-value" th:text="${openTickets}"></div>
                 <div class="stat-label">Open / In Progress</div>
             </div>
-        </div>
-        <div class="card stat-card">
+            <i class="fa-solid fa-chevron-right stat-hint"></i>
+        </a>
+        <a class="card stat-card" th:href="@{/student/registration}">
             <span class="stat-icon"><i class="fa-solid fa-calendar-check"></i></span>
             <div class="stat-body">
                 <div class="stat-value" th:text="${hasOpenSemester} ? 'Open' : 'Closed'"></div>
                 <div class="stat-label">Semester Registration</div>
             </div>
-        </div>
+            <i class="fa-solid fa-chevron-right stat-hint"></i>
+        </a>
     </div>
 
     <div class="section-title"><h2><i class="fa-solid fa-bolt"></i> Quick Actions</h2></div>

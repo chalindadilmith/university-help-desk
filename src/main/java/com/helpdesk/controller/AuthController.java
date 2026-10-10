@@ -10,6 +10,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 /**
  * Login page rendering is handled here; the actual authentication check on
@@ -20,14 +21,51 @@ import org.springframework.web.bind.annotation.PostMapping;
 public class AuthController {
 
     private final UserService userService;
+    private final com.helpdesk.service.PasswordResetService passwordResetService;
 
-    public AuthController(UserService userService) {
+    public AuthController(UserService userService, com.helpdesk.service.PasswordResetService passwordResetService) {
         this.userService = userService;
+        this.passwordResetService = passwordResetService;
     }
 
     @GetMapping("/login")
     public String loginPage() {
         return "auth/login";
+    }
+
+    @GetMapping("/forgot-password")
+    public String forgotPage() {
+        return "auth/forgot-password";
+    }
+
+    @PostMapping("/forgot-password")
+    public String forgot(@RequestParam(required = false) String email,
+                         org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+        passwordResetService.requestReset(email);
+        // same answer whether or not the email exists
+        redirectAttributes.addFlashAttribute("sent", true);
+        return "redirect:/forgot-password";
+    }
+
+    @GetMapping("/reset-password")
+    public String resetPage(@RequestParam(required = false) String token, Model model) {
+        model.addAttribute("token", token);
+        model.addAttribute("valid", passwordResetService.isValid(token));
+        return "auth/reset-password";
+    }
+
+    @PostMapping("/reset-password")
+    public String reset(@RequestParam String token, @RequestParam String password,
+                        @RequestParam String confirmPassword, Model model) {
+        try {
+            passwordResetService.resetPassword(token, password, confirmPassword);
+            return "redirect:/login?reset";
+        } catch (com.helpdesk.exception.BusinessRuleException e) {
+            model.addAttribute("token", token);
+            model.addAttribute("valid", passwordResetService.isValid(token));
+            model.addAttribute("error", e.getMessage());
+            return "auth/reset-password";
+        }
     }
 
     @GetMapping("/register")

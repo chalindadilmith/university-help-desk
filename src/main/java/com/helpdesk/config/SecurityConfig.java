@@ -1,6 +1,14 @@
 package com.helpdesk.config;
 
 import com.helpdesk.security.CustomUserDetailsService;
+import com.helpdesk.security.LoginAttemptService;
+import com.helpdesk.security.LoginRateLimitFilter;
+import org.springframework.security.core.session.SessionRegistry;
+import org.springframework.security.core.session.SessionRegistryImpl;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.session.HttpSessionEventPublisher;
+import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
+import org.springframework.security.web.header.writers.StaticHeadersWriter;
 import com.helpdesk.security.RoleBasedAuthenticationSuccessHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,15 +35,47 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 public class SecurityConfig {
 
     private final CustomUserDetailsService userDetailsService;
+    private final LoginAttemptService loginAttemptService;
 
-    public SecurityConfig(CustomUserDetailsService userDetailsService) {
+    public SecurityConfig(CustomUserDetailsService userDetailsService, LoginAttemptService loginAttemptService) {
         this.userDetailsService = userDetailsService;
+        this.loginAttemptService = loginAttemptService;
     }
+
+    /**
+     * Content-Security-Policy: only this site's own files (Font Awesome is served locally too).
+     * 'unsafe-inline' is still needed for scripts/styles because the templates use inline
+     * onclick handlers and style attributes; moving those into app.js/style.css would let
+     * this be tightened further.
+     */
+    private static final String CSP = String.join("; ",
+            "default-src 'self'",
+            "script-src 'self' 'unsafe-inline'",
+            "style-src 'self' 'unsafe-inline'",
+            "font-src 'self' data:",
+            "img-src 'self' data:",
+            "connect-src 'self'",
+            "object-src 'none'",
+            "base-uri 'self'",
+            "form-action 'self'",
+            "frame-ancestors 'none'");
 
     /** BCrypt - the only acceptable password storage mechanism for this project. Never store plain text. */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    /** Knows every live session - used to show staff and admins who is logged in right now. */
+    @Bean
+    public SessionRegistry sessionRegistry() {
+        return new SessionRegistryImpl();
+    }
+
+    /** Tells the registry when a session ends (logout or timeout) so "online" stays accurate. */
+    @Bean
+    public HttpSessionEventPublisher httpSessionEventPublisher() {
+        return new HttpSessionEventPublisher();
     }
 
     @Bean
@@ -50,11 +90,11 @@ public class SecurityConfig {
             // <form th:action="@{...}"> automatically gets a hidden CSRF token
             // because thymeleaf-extras-springsecurity6 is on the classpath.
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/", "/login", "/register", "/css/**", "/js/**", "/images/**", "/error/**").permitAll()
+                .requestMatchers("/", "/faq", "/login", "/register", "/forgot-password", "/reset-password", "/css/**", "/js/**", "/images/**", "/favicon.ico", "/vendor/**", "/error/**").permitAll()
                 .requestMatchers("/student/**").hasRole("STUDENT")
                 .requestMatchers("/staff/**").hasRole("STAFF")
                 .requestMatchers("/admin/**").hasRole("ADMIN")
-                .requestMatchers("/reports").hasAnyRole("STAFF", "ADMIN")
+                .requestMatchers("/reports", "/reports/**").hasAnyRole("STAFF", "ADMIN")
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
@@ -72,6 +112,19 @@ public class SecurityConfig {
                 .deleteCookies("JSESSIONID")
                 .permitAll()
             )
+            .headers(headers -> headers
+                .contentSecurityPolicy(csp -> csp.policyDirectives(CSP))
+                .referrerPolicy(ref -> ref.policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN))
+                .addHeaderWriter(new StaticHeadersWriter("Permissions-Policy", "camera=(), microphone=(), geolocation=()"))
+                // X-Frame-Options: DENY, X-Content-Type-Options: nosniff and no-cache for pages are Spring Security defaults
+            )
+            // track sessions (unlimited per user) so we can list who is online
+            .sessionManagement(session -> session
+                .sessionConcurrency(concurrency -> concurrency
+                    .maximumSessions(-1)
+                    .sessionRegistry(sessionRegistry())))
+            // refuse login attempts from an email/address that has failed too many times
+            .addFilterBefore(new LoginRateLimitFilter(loginAttemptService), UsernamePasswordAuthenticationFilter.class)
             .userDetailsService(userDetailsService);
 
         return http.build();

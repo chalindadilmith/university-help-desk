@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title th:text="${universityName} + ' Help Desk'">University Help Desk</title>
+<link rel="stylesheet" th:href="@{/vendor/fontawesome/css/all.min.css}"/>
+<link rel="stylesheet" th:href="@{/css/home.css(v=7)}"/>
+<link rel="icon" type="image/svg+xml" th:href="@{/images/favicon.svg(v=3)}"/>
+<link rel="icon" type="image/x-icon" sizes="any" th:href="@{/images/favicon.ico(v=3)}"/>
+</head>
+<body>
+<a class="skip" href="#main">Skip to main content</a>
+<div class="hero">
+<header class="over">
+  <div class="wrap nav">
+    <a class="brand" th:href="@{/}" th:text="${universityName} + ' Help Desk'">University Help Desk</a>
+    <nav class="nav-links" aria-label="Main">
+      <a th:href="@{/#services}">Services</a>
+      <a th:href="@{/#how}">How it works</a>
+      <a th:href="@{/faq}">FAQs</a>
+      <a th:href="@{/#contact}">Contact</a>
+    </nav>
+    <div class="nav-actions">
+      <a class="btn btn-onDark" th:href="@{/register}">Register</a>
+      <a class="btn btn-primary" th:href="@{/login}">Log in</a>
+    </div>
+  </div>
+</header>
+  <div class="hero-body">
+    <h1>What can we help you with?</h1>
+    <p>Search our knowledge base, or log in to raise a request, report a lost item or register for your modules.</p>
+    <form class="hero-search" th:action="@{/faq}" method="get" role="search">
+      <label for="heroKeyword" class="skip">Search the knowledge base</label>
+      <input type="search" id="heroKeyword" name="keyword" maxlength="100" placeholder="Search, e.g. reset password"/>
+      <button type="submit">Search</button>
+    </form>
+  </div>
+</div>
+
+<main id="main">
+  <div class="wrap">
+    <aside class="strip" aria-label="Help desk information">
+      <div><span>Opening hours</span><strong th:text="${contactHours}"></strong></div>
+      <div><span>Location</span><strong th:text="${contactLocation}"></strong></div>
+      <div><span>First response</span><strong th:text="${contactResponse}"></strong></div>
+    </aside>
+  </div>
+
+  <section id="services">
+    <div class="wrap">
+      <div class="head center"><h2>Choose how you would like help</h2><p>Log in with your university email to use these services.</p></div>
+      <div class="grid4">
+        <a class="card" th:href="@{/student/tickets}"><i class="fa-solid fa-ticket ic" aria-hidden="true"></i><h3>Support tickets</h3><p>Report an IT, academic or facilities issue and follow its progress.</p><span class="more">Open &rarr;</span></a>
+        <a class="card" th:href="@{/student/lost-found}"><i class="fa-solid fa-box-open ic" aria-hidden="true"></i><h3>Lost &amp; Found</h3><p>Report a lost or found item, or claim an item that belongs to you.</p><span class="more">Open &rarr;</span></a>
+        <a class="card" th:href="@{/student/registration}"><i class="fa-solid fa-graduation-cap ic" aria-hidden="true"></i><h3>Semester registration</h3><p>Select your modules while registration is open.</p><span class="more">Open &rarr;</span></a>
+        <a class="card" th:href="@{/faq}"><i class="fa-solid fa-circle-question ic" aria-hidden="true"></i><h3>Knowledge base</h3><p>Answers to common questions. No login required.</p><span class="more">Browse &rarr;</span></a>
+      </div>
+    </div>
+  </section>
+
+  <section id="how">
+    <div class="wrap">
+      <div class="head"><h2>How it works</h2></div>
+      <div class="grid3">
+        <div class="card"><div class="num">STEP 1</div><h3>Submit a request</h3><p>Log in and describe your issue under the relevant category.</p></div>
+        <div class="card"><div class="num">STEP 2</div><h3>Request is assigned</h3><p>It is routed to the responsible team and given a reference number.</p></div>
+        <div class="card"><div class="num">STEP 3</div><h3>Track and respond</h3><p>You are notified of each update and can reply to staff until it is resolved.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="faq" th:unless="${#lists.isEmpty(popularArticles)}">
+    <div class="wrap">
+      <div class="head"><h2>Frequently asked questions</h2></div>
+      <div class="faq">
+        <a th:each="a : ${popularArticles}" th:href="@{/faq} + '#article-' + ${a.id}"><span class="t" th:text="${a.title}" style="color:inherit;font-size:inherit"></span> <span th:text="${a.category.name}"></span></a>
+      </div>
+      <p style="margin-top:14px"><a th:href="@{/faq}">See all questions &rarr;</a></p>
+    </div>
+  </section>
+
+  <div class="contact" id="contact">
+    <div class="wrap">
+      <div><h3>Visit</h3><p><span th:text="${contactLocation}"></span><br/><span th:text="${contactHours}"></span></p></div>
+      <div><h3>Email</h3><p><a th:href="'mailto:' + ${contactEmail}" th:text="${contactEmail}"></a></p></div>
+      <div><h3>Telephone</h3><p th:text="${contactPhone}"></p></div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap foot">
+    <span>&copy; <span th:text="${#temporals.year(#temporals.createNow())}">2026</span> <span th:text="${universityName}"></span></span>
+    <span>Help Desk portal</span>
+  </div>
+</footer>
+</body>
+</html>

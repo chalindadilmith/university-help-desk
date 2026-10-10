@@ -14,4 +14,8 @@ public interface LostFoundClaimRepository extends JpaRepository<LostFoundClaim, 
     Optional<LostFoundClaim> findByItemIdAndClaimantId(Long itemId, Long claimantId);
 
     List<LostFoundClaim> findByStatusOrderByCreatedAtAsc(ClaimStatus status);
+
+    List<LostFoundClaim> findByItemIdAndStatus(Long itemId, ClaimStatus status);
+
+    List<LostFoundClaim> findByClaimantIdOrderByCreatedAtDesc(Long claimantId);
 }

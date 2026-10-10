@@ -32,6 +32,6 @@ public class StaffCreateForm {
     @Size(max = 150)
     private String email;
 
-    @NotNull(message = "Select a role")
-    private Role role;
+    /** Not chosen on the form any more: accounts created by an admin are Help Desk Staff. */
+    private Role role = Role.STAFF;
 }

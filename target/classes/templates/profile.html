@@ -5,8 +5,14 @@
 <section>
     <h1><i class="fa-solid fa-user"></i> My Profile</h1>
     <div class="alert alert-success" th:if="${success}"><i class="fa-solid fa-circle-check"></i><span th:text="${success}"></span></div>
+    <div class="alert alert-error" th:if="${user.mustChangePassword}"><i class="fa-solid fa-triangle-exclamation"></i><span>You are using a temporary password. Please change it below before continuing.</span></div>
     <div class="card" style="max-width:480px;">
         <form th:action="@{/profile}" method="post">
+            <th:block th:if="${user.studentCode != null}">
+                <label><i class="fa-solid fa-fingerprint"></i> Student ID</label>
+                <input type="text" th:value="${user.studentCode}" disabled="disabled"/>
+            </th:block>
+
             <label><i class="fa-solid fa-id-card"></i> University / Staff ID</label>
             <input type="text" th:value="${user.universityId}" disabled="disabled"/>
 
@@ -20,6 +26,23 @@
             <input type="text" id="fullName" name="fullName" th:value="${user.fullName}"/>
 
             <button type="submit" class="btn"><i class="fa-solid fa-floppy-disk"></i> Save Changes</button>
+        </form>
+    </div>
+
+    <div class="card mt-1" style="max-width:480px;">
+        <h2><i class="fa-solid fa-key"></i> Change Password</h2>
+        <div class="alert alert-error" th:if="${passwordError}"><i class="fa-solid fa-circle-exclamation"></i><span th:text="${passwordError}"></span></div>
+        <form th:action="@{/profile/password}" method="post">
+            <label for="oldPassword">Current password</label>
+            <input type="password" id="oldPassword" name="oldPassword" required="required" autocomplete="current-password"/>
+
+            <label for="newPassword">New password (min 8 characters, with a letter and a number)</label>
+            <input type="password" id="newPassword" name="newPassword" required="required" minlength="8" maxlength="100" autocomplete="new-password"/>
+
+            <label for="confirmPassword">Confirm new password</label>
+            <input type="password" id="confirmPassword" name="confirmPassword" required="required" minlength="8" maxlength="100" autocomplete="new-password"/>
+
+            <button type="submit" class="btn"><i class="fa-solid fa-key"></i> Change Password</button>
         </form>
     </div>
 </section>

@@ -45,6 +45,18 @@ public class CustomUserDetails implements UserDetails {
         return user.getEmail();
     }
 
+    /** Two principals are the same person when they wrap the same user id (needed by the session registry). */
+    @Override
+    public boolean equals(Object other) {
+        return other instanceof CustomUserDetails that
+                && user.getId() != null && user.getId().equals(that.user.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return user.getId() == null ? 0 : user.getId().hashCode();
+    }
+
     @Override
     public boolean isAccountNonExpired() {
         return true;

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:replace="~{fragments/layout :: layout('Staff Work Pools', 'pools', ~{::section})}">
+<section>
+    <h1><i class="fa-solid fa-people-group"></i> Staff Work Pools</h1>
+    <p class="muted">A work pool is a staff team (e.g. IT Support). Staff roles are set here: a staff member's role is the pool(s) they belong to. Ticket categories are pointed at these pools under <a th:href="@{/admin/config}">Ticket Routing Config</a>.</p>
+
+    <div class="alert alert-success" th:if="${success}"><i class="fa-solid fa-circle-check"></i><span th:text="${success}"></span></div>
+    <div class="alert alert-error" th:if="${error}"><i class="fa-solid fa-circle-exclamation"></i><span th:text="${error}"></span></div>
+
+    <div class="actions">
+        <details class="panel">
+            <summary class="btn"><i class="fa-solid fa-user-plus"></i> Add Staff Members to Existing Staff</summary>
+            <div class="panel-cols">
+                <div>
+                    <h3>Add existing staff to a pool</h3>
+                    <p class="muted" th:if="${#lists.isEmpty(pools)}">Create a work pool first.</p>
+                    <form th:unless="${#lists.isEmpty(pools)}" th:action="@{/admin/pools}" method="post" id="bulkAddForm" data-base="/admin/pools"
+                          onsubmit="this.action = this.dataset.base + '/' + document.getElementById('bulkPool').value + '/staff';">
+                        <label for="bulkPool">Work pool</label>
+                        <select id="bulkPool" required="required">
+                            <option th:each="p : ${pools}" th:value="${p.id}" th:text="${p.name}"></option>
+                        </select>
+                        <label>Staff members</label>
+                        <div class="check-list">
+                            <label th:each="s : ${activeStaff}">
+                                <input type="checkbox" name="staffUserIds" th:value="${s.id}" style="width:auto; display:inline-block;"/>
+                                <span th:text="${s.fullName}"></span>
+                                <span class="muted" th:text="${rolesByStaff.get(s.id) != null} ? '(' + ${#strings.listJoin(rolesByStaff.get(s.id), ', ')} + ')' : '(no pool yet)'"></span>
+                            </label>
+                            <span class="muted" th:if="${#lists.isEmpty(activeStaff)}">There are no active staff accounts yet. Create one on the right.</span>
+                        </div>
+                        <button type="submit" class="btn btn-sm mt-1"><i class="fa-solid fa-user-plus"></i> Add selected to pool</button>
+                    </form>
+                </div>
+                <div>
+                    <h3>Create a new staff account</h3>
+                    <form th:action="@{/admin/pools/new-staff}" th:object="${staffForm}" method="post">
+                        <label for="fullName">Full name</label>
+                        <input type="text" id="fullName" th:field="*{fullName}"/>
+                        <label for="universityId">Staff ID</label>
+                        <input type="text" id="universityId" th:field="*{universityId}"/>
+                        <label for="email">Email</label>
+                        <input type="email" id="email" th:field="*{email}"/>
+                        <label for="newPool">Add to pool (optional)</label>
+                        <select id="newPool" name="poolId">
+                            <option value="">-- none --</option>
+                            <option th:each="p : ${pools}" th:value="${p.id}" th:text="${p.name}"></option>
+                        </select>
+                        <button type="submit" class="btn btn-sm mt-1"><i class="fa-solid fa-user-plus"></i> Create staff account</button>
+                    </form>
+                </div>
+            </div>
+        </details>
+
+        <details class="panel">
+            <summary class="btn btn-outline"><i class="fa-solid fa-plus"></i> New Work Pool</summary>
+            <form th:action="@{/admin/pools}" th:object="${poolForm}" method="post">
+                <label for="poolName">Name</label>
+                <input type="text" id="poolName" th:field="*{name}" placeholder="e.g. IT Support Team"/>
+                <label for="poolDesc">Description (optional)</label>
+                <input type="text" id="poolDesc" th:field="*{description}"/>
+                <button type="submit" class="btn btn-sm mt-1"><i class="fa-solid fa-plus"></i> Create pool</button>
+            </form>
+        </details>
+    </div>
+
+    <div class="empty-state" th:if="${#lists.isEmpty(pools)}"><i class="fa-regular fa-circle-question"></i>No work pools yet.</div>
+
+    <div class="pool-grid">
+        <div class="card pool-card" th:each="p : ${pools}">
+            <h2><i class="fa-solid fa-people-group"></i> <span th:text="${p.name}"></span></h2>
+            <p class="muted" th:if="${p.description}" th:text="${p.description}"></p>
+
+            <strong>Categories served</strong>
+            <div>
+                <span class="tag" th:each="c : ${categoriesByPool.get(p.id)}" th:text="${c.name}"></span>
+                <span class="muted" th:if="${categoriesByPool.get(p.id) == null}">None yet</span>
+            </div>
+
+            <strong class="mt-1" style="display:block;">Members (<span th:text="${#sets.size(p.staffMembers)}"></span>)</strong>
+            <div class="muted" th:if="${#sets.isEmpty(p.staffMembers)}">No staff in this pool yet.</div>
+            <div class="member-row" th:each="s : ${p.staffMembers}">
+                <span><span th:text="${s.fullName}"></span> <span class="cell-sub" th:text="${s.email}"></span></span>
+                <form th:action="@{/admin/pools/{poolId}/staff/{userId}/remove(poolId=${p.id},userId=${s.id})}" method="post">
+                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirmAction('Remove this person from the pool?')"><i class="fa-solid fa-xmark"></i> Remove</button>
+                </form>
+            </div>
+
+            <form th:if="${!#lists.isEmpty(availableByPool.get(p.id))}" th:action="@{/admin/pools/{poolId}/staff(poolId=${p.id})}" method="post" class="form-row mt-1">
+                <select name="staffUserIds">
+                    <option th:each="s : ${availableByPool.get(p.id)}" th:value="${s.id}" th:text="${s.fullName}"></option>
+                </select>
+                <button type="submit" class="btn btn-sm btn-secondary"><i class="fa-solid fa-user-plus"></i> Add</button>
+            </form>
+        </div>
+    </div>
+</section>
+</div>
+</body>
+</html>

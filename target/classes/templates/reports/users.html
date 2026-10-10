@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:replace="~{fragments/layout :: layout('Users &amp; Reports', 'user-reports', ~{::section})}">
+<section>
+    <h1><i class="fa-solid fa-users-viewfinder"></i> Users &amp; Member Reports</h1>
+    <p class="muted">See who is logged in, every member's details, and open a full report for any student, staff member or admin.</p>
+
+    <div class="card-grid">
+        <a class="card stat-card" th:href="@{/reports/users}"><span class="stat-icon"><i class="fa-solid fa-users"></i></span>
+            <div class="stat-body"><div class="stat-value" th:text="${totalUsers}"></div><div class="stat-label">All members</div></div><i class="fa-solid fa-chevron-right stat-hint"></i></a>
+        <a class="card stat-card" th:href="@{/reports/users(role='STUDENT')}"><span class="stat-icon"><i class="fa-solid fa-user-graduate"></i></span>
+            <div class="stat-body"><div class="stat-value" th:text="${studentCount}"></div><div class="stat-label">Students</div></div><i class="fa-solid fa-chevron-right stat-hint"></i></a>
+        <a class="card stat-card" th:href="@{/reports/users(role='STAFF')}"><span class="stat-icon"><i class="fa-solid fa-headset"></i></span>
+            <div class="stat-body"><div class="stat-value" th:text="${staffCount}"></div><div class="stat-label">Staff</div></div><i class="fa-solid fa-chevron-right stat-hint"></i></a>
+        <a class="card stat-card" th:href="@{/reports/users(view='online')}"><span class="stat-icon"><i class="fa-solid fa-signal"></i></span>
+            <div class="stat-body"><div class="stat-value" th:text="${#lists.size(online)}"></div><div class="stat-label">Logged in now</div></div><i class="fa-solid fa-chevron-right stat-hint"></i></a>
+    </div>
+
+    <div class="section-title"><h2><i class="fa-solid fa-signal"></i> Logged in now</h2></div>
+    <div class="empty-state" th:if="${#lists.isEmpty(online)}"><i class="fa-regular fa-moon"></i>Nobody is logged in right now.</div>
+    <div class="table-wrap" th:unless="${#lists.isEmpty(online)}">
+        <table>
+            <thead><tr><th></th><th>Name</th><th>Role</th><th>Email</th><th>Sessions</th><th>Last activity</th><th></th></tr></thead>
+            <tbody>
+            <tr th:each="o : ${online}">
+                <td><span th:class="${o.activeNow()} ? 'dot-online' : 'dot-idle'" th:title="${o.activeNow()} ? 'Active' : 'Idle'"></span></td>
+                <td th:text="${o.user().fullName}"></td>
+                <td th:text="${o.user().role}"></td>
+                <td th:text="${o.user().email}"></td>
+                <td th:text="${o.sessions()}"></td>
+                <td th:text="${#temporals.format(o.lastActivity(), 'dd MMM, HH:mm:ss')}"></td>
+                <td><a th:href="@{/reports/users/{id}(id=${o.user().id})}" class="btn btn-sm btn-outline"><i class="fa-solid fa-id-card"></i> Report</a></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <p class="muted">Green = active in the last <span th:text="${activeWindow}"></span> minutes; grey = signed in but idle.</p>
+
+    <div class="section-title"><h2><i class="fa-solid fa-list"></i> All members</h2></div>
+    <form th:action="@{/reports/users}" method="get" class="form-row" style="align-items:flex-end;">
+        <div><input type="text" name="keyword" th:value="${keyword}" placeholder="Search name, email, staff ID or student ID"/></div>
+        <div>
+            <select name="role">
+                <option value="">All roles</option>
+                <option value="STUDENT" th:selected="${selectedRole != null and selectedRole.name() == 'STUDENT'}">Student</option>
+                <option value="STAFF" th:selected="${selectedRole != null and selectedRole.name() == 'STAFF'}">Staff</option>
+                <option value="ADMIN" th:selected="${selectedRole != null and selectedRole.name() == 'ADMIN'}">Admin</option>
+            </select>
+        </div>
+        <div>
+            <select name="view">
+                <option value="">Everyone</option>
+                <option value="online" th:selected="${view == 'online'}">Logged in now</option>
+            </select>
+        </div>
+        <div>
+            <button type="submit" class="btn"><i class="fa-solid fa-magnifying-glass"></i> Search</button>
+            <a th:href="@{/reports/users}" class="btn btn-outline">Reset</a>
+        </div>
+    </form>
+    <p class="count-line"><strong th:text="${#lists.size(users)}">0</strong> member(s) shown<span th:if="${deactivatedCount > 0}"> &middot; <span th:text="${deactivatedCount}"></span> deactivated in total</span></p>
+    <div class="empty-state" th:if="${#lists.isEmpty(users)}"><i class="fa-regular fa-circle-question"></i>No members match.</div>
+    <div class="table-wrap" th:unless="${#lists.isEmpty(users)}">
+        <table>
+            <thead><tr><th></th><th>Name</th><th>Role</th><th>ID</th><th>Email</th><th>Status</th><th>Joined</th><th>Last login</th><th></th></tr></thead>
+            <tbody>
+            <tr th:each="u : ${users}">
+                <td><span th:class="${onlineIds.contains(u.id)} ? 'dot-online' : 'dot-idle'"></span></td>
+                <td th:text="${u.fullName}"></td>
+                <td th:text="${u.role}"></td>
+                <td><span th:text="${u.universityId}"></span><div class="cell-sub" th:if="${u.studentCode != null}" th:text="${u.studentCode}"></div></td>
+                <td th:text="${u.email}"></td>
+                <td><span class="badge" th:classappend="'badge-' + ${u.status.name().toLowerCase()}" th:text="${u.status}"></span></td>
+                <td th:text="${#temporals.format(u.createdAt, 'dd MMM yyyy')}"></td>
+                <td th:text="${u.lastLoginAt != null} ? ${#temporals.format(u.lastLoginAt, 'dd MMM yyyy, HH:mm')} : 'Never'"></td>
+                <td class="actions">
+                    <a th:href="@{/reports/users/{id}(id=${u.id})}" class="btn btn-sm"><i class="fa-solid fa-id-card"></i> Full report</a>
+                    <a th:href="@{/reports/users/{id}/export.csv(id=${u.id})}" class="btn btn-sm btn-outline"><i class="fa-solid fa-file-csv"></i> CSV</a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+</div>
+</body>
+</html>

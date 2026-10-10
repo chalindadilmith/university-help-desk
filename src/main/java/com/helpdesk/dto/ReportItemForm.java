@@ -31,4 +31,7 @@ public class ReportItemForm {
     @NotNull(message = "Date is required")
     @PastOrPresent(message = "Date cannot be in the future")
     private LocalDate itemDate;
+
+    /** Required photo of the item (checked in the controller/service; PNG or JPG). */
+    private org.springframework.web.multipart.MultipartFile image;
 }

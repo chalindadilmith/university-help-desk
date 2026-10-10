@@ -2,6 +2,7 @@ package com.helpdesk.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -14,6 +15,7 @@ import java.time.LocalDate;
 public class SemesterForm {
 
     @NotBlank(message = "Name is required")
+    @Size(max = 50, message = "Name must be 50 characters or fewer")
     private String name;
 
     @NotNull(message = "Start date is required")

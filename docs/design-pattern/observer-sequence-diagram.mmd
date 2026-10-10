@@ -1,0 +1,23 @@
+sequenceDiagram
+    actor Staff as Help Desk Staff
+    participant C as StaffTicketController
+    participant S as TicketServiceImpl
+    participant Sub as TicketEventSubject
+    participant A as AuditLogObserver
+    participant N as StaffNotificationObserver
+    participant St as StudentNotificationObserver
+
+    Staff->>C: Mark ticket RESOLVED
+    C->>S: updateStatus(ticketId, "RESOLVED", staff)
+    S->>S: validate transition, set status, set resolvedAt
+    S->>Sub: notifyObservers(STATUS_CHANGED event)
+    Sub->>A: update(event)
+    A->>A: write audit log TICKET_STATUS_RESOLVED
+    Sub->>N: update(event)
+    N-->>N: ignore (no staff reaction)
+    Sub->>St: update(event)
+    St->>St: save bell notification for the student
+    St->>St: send e-mail to the student (async)
+    Sub-->>S: return
+    S-->>C: updated ticket
+    C-->>Staff: redirect to ticket page

@@ -46,6 +46,7 @@ public class DemoDataSeeder implements CommandLineRunner {
     private final SemesterRepository semesterRepository;
     private final CourseRepository courseRepository;
     private final CourseOfferingRepository offeringRepository;
+    private final DegreeSpecialisationRepository specialisationRepository;
 
     @Value("${app.seed-demo-data:true}")
     private boolean seedDemoData;
@@ -54,7 +55,8 @@ public class DemoDataSeeder implements CommandLineRunner {
                            TicketCategoryRepository categoryRepository, JobPoolRepository poolRepository,
                            RoutingRuleRepository routingRuleRepository, KbCategoryRepository kbCategoryRepository,
                            KbArticleRepository kbArticleRepository, SemesterRepository semesterRepository,
-                           CourseRepository courseRepository, CourseOfferingRepository offeringRepository) {
+                           CourseRepository courseRepository, CourseOfferingRepository offeringRepository,
+                           DegreeSpecialisationRepository specialisationRepository) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.categoryRepository = categoryRepository;
@@ -65,6 +67,7 @@ public class DemoDataSeeder implements CommandLineRunner {
         this.semesterRepository = semesterRepository;
         this.courseRepository = courseRepository;
         this.offeringRepository = offeringRepository;
+        this.specialisationRepository = specialisationRepository;
     }
 
     @Override
@@ -92,6 +95,8 @@ public class DemoDataSeeder implements CommandLineRunner {
                     .passwordHash(passwordEncoder.encode(rawPassword))
                     .role(role)
                     .status(AccountStatus.ACTIVE)
+                    // the demo password is public (README), so force a change at first login
+                    .mustChangePassword(true)
                     .build();
             User saved = userRepository.save(user);
             log.warn("Seeded DEMO {} account -> email: {} / password: {}  (DEV ONLY - change/remove before final submission)",
@@ -163,11 +168,19 @@ public class DemoDataSeeder implements CommandLineRunner {
                 .registrationOpen(true)
                 .build());
 
-        Course se2030 = courseRepository.save(Course.builder().code("SE2030").name("Software Engineering").credits(4).build());
-        Course it1010 = courseRepository.save(Course.builder().code("IT1010").name("Introduction to Programming").credits(3).build());
+        // Specialisations are seeded by RegistrationSchemaInitializer (runs first).
+        DegreeSpecialisation se = specialisationRepository.findAll().stream()
+                .filter(sp -> "SE".equalsIgnoreCase(sp.getCode())).findFirst().orElse(null);
 
-        offeringRepository.save(CourseOffering.builder().semester(semester).course(se2030).capacity(60).scheduleInfo("Mon/Wed 09:00-11:00").build());
+        Course it1010 = courseRepository.save(Course.builder().code("IT1010").name("Introduction to Programming").credits(3).yearLevel(1).build());
+        Course se2030 = courseRepository.save(Course.builder().code("SE2030").name("Software Engineering").credits(4).yearLevel(2).build());
+        Course it2040 = courseRepository.save(Course.builder().code("IT2040").name("Database Management Systems").credits(4).yearLevel(2).build());
+        Course se3010 = courseRepository.save(Course.builder().code("SE3010").name("Software Engineering Process & Quality Management").credits(4).yearLevel(3).specialisation(se).build());
+
         offeringRepository.save(CourseOffering.builder().semester(semester).course(it1010).capacity(80).scheduleInfo("Tue/Thu 13:00-15:00").build());
+        offeringRepository.save(CourseOffering.builder().semester(semester).course(se2030).capacity(60).scheduleInfo("Mon/Wed 09:00-11:00").build());
+        offeringRepository.save(CourseOffering.builder().semester(semester).course(it2040).capacity(60).scheduleInfo("Fri 08:30-11:30").build());
+        offeringRepository.save(CourseOffering.builder().semester(semester).course(se3010).capacity(40).scheduleInfo("Mon 13:00-16:00").build());
 
         log.info("Seeded an open semester with a sample course catalog.");
     }

@@ -52,7 +52,21 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     @Transactional
     public void markAllRead(Long userId) {
-        List<Notification> notifications = notificationRepository.findTop20ByRecipientIdOrderByCreatedAtDesc(userId);
-        notifications.forEach(n -> n.setRead(true));
+        notificationRepository.findByRecipientIdAndReadFalse(userId).forEach(n -> n.setRead(true));
+    }
+
+    @Override
+    public org.springframework.data.domain.Page<Notification> page(Long userId, int page, int size) {
+        return notificationRepository.findByRecipientIdOrderByCreatedAtDesc(userId,
+                org.springframework.data.domain.PageRequest.of(Math.max(page, 0), size));
+    }
+
+    @Override
+    @Transactional
+    public Notification markRead(Long userId, Long notificationId) {
+        return notificationRepository.findByIdAndRecipientId(notificationId, userId).map(n -> {
+            n.setRead(true);
+            return n;
+        }).orElse(null);
     }
 }

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:replace="~{fragments/layout :: layout('Module Offerings', 'modules', ~{::section})}">
+<section>
+    <h1><i class="fa-solid fa-layer-group"></i> Module Offerings</h1>
+    <div class="alert alert-success" th:if="${success}"><i class="fa-solid fa-circle-check"></i><span th:text="${success}"></span></div>
+    <div class="alert alert-error" th:if="${error}"><i class="fa-solid fa-circle-exclamation"></i><span th:text="${error}"></span></div>
+
+    <!-- Offerings for a semester -->
+    <div class="section-title"><h2><i class="fa-solid fa-calendar-week"></i> Modules Offered per Semester</h2></div>
+    <div class="empty-state" th:if="${selectedSemester == null}"><i class="fa-regular fa-calendar-xmark"></i>Create a semester first on the <a th:href="@{/admin/registration-config}">Registration Setup</a> page.</div>
+    <div class="card" th:if="${selectedSemester != null}">
+        <form method="get" th:action="@{/admin/modules}" class="form-row" style="align-items:flex-end; max-width:420px;">
+            <div>
+                <label for="semesterFilter">Semester</label>
+                <select id="semesterFilter" name="semesterId" onchange="this.form.submit()">
+                    <option th:each="s : ${semesters}" th:value="${s.id}" th:text="${s.name}" th:selected="${s.id == selectedSemester.id}"></option>
+                </select>
+            </div>
+        </form>
+
+        <form th:action="@{/admin/modules/offerings}" th:object="${offeringForm}" method="post" class="form-row mt-1" style="align-items:flex-end;">
+            <input type="hidden" th:field="*{semesterId}"/>
+            <div>
+                <label for="offCourse">Module</label>
+                <select id="offCourse" th:field="*{courseId}">
+                    <option value="">-- Select module --</option>
+                    <option th:each="c : ${courses}" th:value="${c.id}" th:text="${c.code} + ' - ' + ${c.name}"></option>
+                </select>
+            </div>
+            <div><label for="capacity">Capacity</label><input type="number" min="1" id="capacity" th:field="*{capacity}"/></div>
+            <div><label for="scheduleInfo">Schedule</label><input type="text" id="scheduleInfo" th:field="*{scheduleInfo}" placeholder="e.g. Mon/Wed 9-11am"/></div>
+            <div><button type="submit" class="btn"><i class="fa-solid fa-plus"></i> Offer Module</button></div>
+        </form>
+
+        <div class="empty-state" th:if="${#lists.isEmpty(offerings)}"><i class="fa-regular fa-folder-open"></i>No modules offered in this semester yet.</div>
+        <table class="mt-1" th:unless="${#lists.isEmpty(offerings)}">
+            <thead><tr><th>Module</th><th>Year</th><th>Specialisation</th><th>Credits</th><th>Seats taken</th><th>Schedule</th><th></th></tr></thead>
+            <tbody>
+            <tr th:each="o : ${offerings}">
+                <td><strong th:text="${o.course.code}"></strong> <span th:text="${o.course.name}"></span></td>
+                <td th:text="${o.course.yearLevel != null} ? 'Year ' + ${o.course.yearLevel} : 'Any'"></td>
+                <td th:text="${o.course.specialisation != null} ? ${o.course.specialisation.code} : 'Common'"></td>
+                <td th:text="${o.course.credits}"></td>
+                <td th:text="${seatsTaken.get(o.id)} + ' / ' + ${o.capacity}"></td>
+                <td class="muted" th:text="${o.scheduleInfo}"></td>
+                <td class="actions">
+                    <a class="btn btn-sm btn-outline" th:href="@{/admin/modules/offerings/{id}/edit(id=${o.id})}"><i class="fa-solid fa-pen"></i> Edit</a>
+                    <form th:action="@{/admin/modules/offerings/{id}/delete(id=${o.id})}" method="post" style="display:inline;">
+                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirmAction('Remove this module from the semester?')"><i class="fa-solid fa-trash"></i></button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Module catalog -->
+    <div class="section-title"><h2><i class="fa-solid fa-book"></i> Module Catalog</h2></div>
+    <div class="card">
+        <form th:action="@{/admin/modules/courses}" th:object="${courseForm}" method="post">
+            <div class="form-row">
+                <div><label for="courseCode">Code</label><input type="text" id="courseCode" th:field="*{code}" placeholder="e.g. SE2030"/></div>
+                <div><label for="courseName">Name</label><input type="text" id="courseName" th:field="*{name}"/></div>
+            </div>
+            <div class="form-row" style="align-items:flex-end;">
+                <div><label for="credits">Credits</label><input type="number" min="1" max="10" id="credits" th:field="*{credits}"/></div>
+                <div>
+                    <label for="yearLevel">Academic Year</label>
+                    <select id="yearLevel" th:field="*{yearLevel}">
+                        <option value="">-- Select --</option>
+                        <option th:each="y : ${#numbers.sequence(1, 4)}" th:value="${y}" th:text="'Year ' + ${y}"></option>
+                    </select>
+                </div>
+                <div>
+                    <label for="courseSpec">Specialisation</label>
+                    <select id="courseSpec" th:field="*{specialisationId}">
+                        <option value="">Common (all specialisations)</option>
+                        <option th:each="sp : ${specialisations}" th:value="${sp.id}" th:text="${sp.name}"></option>
+                    </select>
+                </div>
+                <div><button type="submit" class="btn"><i class="fa-solid fa-plus"></i> Add Module</button></div>
+            </div>
+        </form>
+
+        <table class="mt-1">
+            <thead><tr><th>Code</th><th>Name</th><th>Credits</th><th>Year</th><th>Specialisation</th><th></th></tr></thead>
+            <tbody>
+            <tr th:each="c : ${courses}">
+                <td th:text="${c.code}"></td>
+                <td th:text="${c.name}"></td>
+                <td th:text="${c.credits}"></td>
+                <td th:text="${c.yearLevel != null} ? 'Year ' + ${c.yearLevel} : 'Any'"></td>
+                <td th:text="${c.specialisation != null} ? ${c.specialisation.name} : 'Common'"></td>
+                <td class="actions">
+                    <a class="btn btn-sm btn-outline" th:href="@{/admin/modules/courses/{id}/edit(id=${c.id})}"><i class="fa-solid fa-pen"></i> Edit</a>
+                    <form th:action="@{/admin/modules/courses/{id}/delete(id=${c.id})}" method="post" style="display:inline;">
+                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirmAction('Delete this module from the catalog?')"><i class="fa-solid fa-trash"></i></button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+</div>
+</body>
+</html>
