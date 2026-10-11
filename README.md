@@ -80,7 +80,7 @@ Students create tickets against a category (`/student/tickets`), track status in
 Admin defines ticket categories, groups them into staff work-pools, assigns staff to pools, and sets routing rules per category+priority (`/admin/config`) — a database unique constraint prevents two conflicting rules for the same category+priority combination.
 
 **F4 — Knowledge Base + Chatbot**
-Students search published FAQ articles and use a keyword-matching chatbot widget (`/student/kb`) that searches the same KB and, after two unmatched questions in a row, offers to create a ticket. Staff manage articles (`/staff/kb`).
+Students search published FAQ articles and use a chatbot widget (`/student/kb`). The chatbot answers from the same KB: when `CHATBOT_API_KEY` is set it uses an OpenAI-compatible AI service (KB articles plus a minimal summary of the student's own tickets are given as context); otherwise, or if the AI call fails, it falls back to keyword matching against the KB. After two unanswered questions in a row it offers to create a ticket. Staff and admins manage articles and categories (`/staff/kb`): create, edit, publish/unpublish and delete articles (content up to 10,000 characters), and add, rename and delete categories (a category can only be deleted when no article uses it).
 
 **F5 — Notifications, Reporting & Feedback**
 A notification bell (top-right on every page) fires on ticket status changes, Lost & Found claim events, and registration confirmations. Students rate resolved tickets (`student/ticket-detail.html`). Staff/Admin view live ticket-volume, resolution-time, and satisfaction statistics at `/reports`, computed from the database on demand — no fabricated numbers.
@@ -107,7 +107,7 @@ Diagrams and a runnable plain-Java demo (`java ObserverDemo.java`) are in `docs/
 ## Documented simplifications (intentional, not bugs)
 
 - **Email is only used for password reset and Lost & Found verification, and there is no SMS.** When an Admin creates a Staff/Admin account, the temporary password is shown once on screen instead of emailed. If `MAIL_USERNAME` is not set, emails are written to the application log instead of being sent (see "Email setup").
-- **Chatbot is keyword-matching against the KB**, not a real NLP/LLM service — appropriate for the project's time budget (documented as a Phase 0 decision).
+- **Chatbot is KB-first with an optional AI layer.** Keyword matching against the KB is the always-available fallback (the original Phase 0 decision, kept for the project's time budget). Setting `CHATBOT_API_KEY` adds conversational AI answers on top; the chatbot works without it.
 - **No structured course schedule/timetable data**, so registration enforces a credit limit but not day/time conflict detection — `Course`/`CourseOffering` only store a free-text schedule string.
 - **Reports are computed live via JPA queries/streams** each time the page loads rather than cached — fine at this project's scale, and guarantees the numbers are always current.
 

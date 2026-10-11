@@ -20,6 +20,7 @@ public class ArticleForm {
     private String title;
 
     @NotBlank(message = "Content is required")
+    @Size(max = 10000, message = "Content must be 10,000 characters or fewer")
     private String content;
 
     @NotNull(message = "Select a category")

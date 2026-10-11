@@ -92,6 +92,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/", "/faq", "/login", "/register", "/forgot-password", "/reset-password", "/css/**", "/js/**", "/images/**", "/favicon.ico", "/vendor/**", "/error/**").permitAll()
                 .requestMatchers("/student/**").hasRole("STUDENT")
+                .requestMatchers("/staff/kb", "/staff/kb/**").hasAnyRole("STAFF", "ADMIN")
                 .requestMatchers("/staff/**").hasRole("STAFF")
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .requestMatchers("/reports", "/reports/**").hasAnyRole("STAFF", "ADMIN")

@@ -23,7 +23,7 @@
             <span class="field-error" th:if="${#fields.hasErrors('categoryId')}" th:errors="*{categoryId}"></span>
 
             <label for="content">Content</label>
-            <textarea id="content" th:field="*{content}" style="min-height:160px;"></textarea>
+            <textarea id="content" th:field="*{content}" maxlength="10000" style="min-height:160px;"></textarea>
             <span class="field-error" th:if="${#fields.hasErrors('content')}" th:errors="*{content}"></span>
 
             <label for="status">Status</label>
@@ -43,6 +43,29 @@
             <div><label for="catName">Name</label><input type="text" id="catName" name="name" maxlength="100" required/></div>
             <div><button type="submit" class="btn btn-sm btn-secondary">Add</button></div>
         </form>
+
+        <div th:unless="${#lists.isEmpty(categories)}" style="margin-top:1rem;">
+            <h3>Existing Categories</h3>
+            <p class="muted">Rename a category, or remove it when no article uses it.</p>
+            <table>
+                <thead><tr><th>Name</th><th></th></tr></thead>
+                <tbody>
+                <tr th:each="c : ${categories}">
+                    <td>
+                        <form th:action="@{/staff/kb/categories/{id}/rename(id=${c.id})}" method="post" style="display:flex;gap:.5rem;align-items:center;">
+                            <input type="text" name="name" th:value="${c.name}" maxlength="100" required th:attr="aria-label='Name of category ' + ${c.name}"/>
+                            <button type="submit" class="btn btn-sm btn-outline">Rename</button>
+                        </form>
+                    </td>
+                    <td>
+                        <form th:action="@{/staff/kb/categories/{id}/delete(id=${c.id})}" method="post" style="display:inline;">
+                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirmAction('Remove this category?')">Remove</button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <div class="section-title"><h2>All Articles</h2></div>
