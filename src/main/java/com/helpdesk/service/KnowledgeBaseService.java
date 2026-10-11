@@ -29,6 +29,12 @@ public interface KnowledgeBaseService {
 
     KbCategory createCategory(String name);
 
+    /** Renames a category (same name rules as create; keeping the same name apart from letter case is allowed). */
+    KbCategory updateCategory(Long id, String name);
+
+    /** Deletes a category, but only when no article uses it. */
+    KbCategory deleteCategory(Long id);
+
     KbArticle saveArticle(ArticleForm form, User author);
 
     void deleteArticle(Long id);

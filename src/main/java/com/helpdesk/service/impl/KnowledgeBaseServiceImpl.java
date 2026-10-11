@@ -138,6 +138,42 @@ public class KnowledgeBaseServiceImpl implements KnowledgeBaseService {
     @Override
     @Transactional
     public KbCategory createCategory(String name) {
+        String clean = cleanCategoryName(name);
+        if (categoryRepository.existsByNameIgnoreCase(clean)) {
+            throw new DuplicateResourceException("name", "A KB category with this name already exists.");
+        }
+        return categoryRepository.save(KbCategory.builder().name(clean).build());
+    }
+
+    @Override
+    @Transactional
+    public KbCategory updateCategory(Long id, String name) {
+        KbCategory category = categoryRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("KB category not found: " + id));
+        String clean = cleanCategoryName(name);
+        // the category may keep its own name (e.g. only the letter case changes)
+        if (!clean.equalsIgnoreCase(category.getName()) && categoryRepository.existsByNameIgnoreCase(clean)) {
+            throw new DuplicateResourceException("name", "A KB category with this name already exists.");
+        }
+        category.setName(clean);
+        return categoryRepository.save(category);
+    }
+
+    @Override
+    @Transactional
+    public KbCategory deleteCategory(Long id) {
+        KbCategory category = categoryRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("KB category not found: " + id));
+        long used = articleRepository.countByCategoryId(id);
+        if (used > 0) {
+            throw new BusinessRuleException("Category \"" + category.getName() + "\" is used by " + used
+                    + " article(s). Move or remove those articles first.");
+        }
+        categoryRepository.delete(category);
+        return category;
+    }
+
+    private static String cleanCategoryName(String name) {
         String clean = name == null ? "" : name.strip().replaceAll("\\s+", " ");
         if (clean.isEmpty()) {
             throw new BusinessRuleException("Category name cannot be empty.");
@@ -145,10 +181,7 @@ public class KnowledgeBaseServiceImpl implements KnowledgeBaseService {
         if (clean.length() > 100) {
             throw new BusinessRuleException("Category name must be 100 characters or fewer.");
         }
-        if (categoryRepository.existsByNameIgnoreCase(clean)) {
-            throw new DuplicateResourceException("name", "A KB category with this name already exists.");
-        }
-        return categoryRepository.save(KbCategory.builder().name(clean).build());
+        return clean;
     }
 
     @Override

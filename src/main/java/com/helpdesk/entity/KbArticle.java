@@ -46,6 +46,7 @@ public class KbArticle {
     // is SQL Server's modern unbounded-string type and behaves like a plain
     // string column for LOWER()/LIKE, while still allowing unlimited length.
     @NotBlank
+    @Size(max = 10000)
     @Column(name = "content", nullable = false, columnDefinition = "NVARCHAR(MAX)")
     private String content;
 

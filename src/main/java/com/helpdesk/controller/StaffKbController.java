@@ -83,6 +83,35 @@ public class StaffKbController {
         return "redirect:/staff/kb";
     }
 
+    @PostMapping("/categories/{id}/rename")
+    public String renameCategory(@PathVariable Long id, @RequestParam(required = false) String name,
+                                 @AuthenticationPrincipal CustomUserDetails principal,
+                                 RedirectAttributes redirectAttributes) {
+        try {
+            var category = knowledgeBaseService.updateCategory(id, name);
+            auditLogService.log(principal.getUser(), "KB_CATEGORY_UPDATED", "KbCategory", category.getId(),
+                    "\"" + category.getName() + "\"");
+            redirectAttributes.addFlashAttribute("success", "Category renamed to \"" + category.getName() + "\".");
+        } catch (BusinessRuleException | DuplicateResourceException | ResourceNotFoundException e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+        }
+        return "redirect:/staff/kb";
+    }
+
+    @PostMapping("/categories/{id}/delete")
+    public String deleteCategory(@PathVariable Long id, @AuthenticationPrincipal CustomUserDetails principal,
+                                 RedirectAttributes redirectAttributes) {
+        try {
+            var category = knowledgeBaseService.deleteCategory(id);
+            auditLogService.log(principal.getUser(), "KB_CATEGORY_DELETED", "KbCategory", id,
+                    "\"" + category.getName() + "\"");
+            redirectAttributes.addFlashAttribute("success", "Category \"" + category.getName() + "\" removed.");
+        } catch (BusinessRuleException | ResourceNotFoundException e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+        }
+        return "redirect:/staff/kb";
+    }
+
     @PostMapping("/{id}/delete")
     public String delete(@PathVariable Long id, @AuthenticationPrincipal CustomUserDetails principal,
                          RedirectAttributes redirectAttributes) {
